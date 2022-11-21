@@ -685,6 +685,8 @@ def _extrapolate_single_timestep(
     for c in "xyz":
         ds_traj_posn_next_est[c] = 2.0 * ds_traj_posn_origin[c] - ds_traj_posn_prev[c]
 
+    traj_num = ds_traj_posn_prev.trajectory_number.values
+
     ds_traj_posn_next_est = _confine_traj_bounds(
         ds_traj_posn_next_est,
         ds_grid,
@@ -723,7 +725,9 @@ def _extrapolate_single_timestep(
     # Copy in final error measure for each trajectory.
     for i, c in enumerate("xyz"):
         derr = xr.DataArray(
-            dist[i, :], coords={"trajectory_number": np.arange(len(dist[i, :]))}
+            # dist[i, :], coords={"trajectory_number": np.arange(len(dist[i, :]))}
+            dist[i, :],
+            coords={"trajectory_number": traj_num},
         )
         ds_traj_posn_next[f"{c}_err"] = derr
 
