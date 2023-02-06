@@ -5,3 +5,4 @@ netCDF4
 numba
 tqdm
 networkx
+scipy
