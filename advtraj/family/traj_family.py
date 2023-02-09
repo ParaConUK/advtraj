@@ -19,6 +19,10 @@ from cohobj.object_tools import (
     box_overlap_with_wrap,
     get_object_labels,
     refine_object_overlap,
+    refine_object_overlap_fast,
+    tr_data_at_time,
+    tr_data_obj,
+    tr_objects_to_numpy,
     unsplit_objects,
 )
 
@@ -353,19 +357,20 @@ def family_coords(family, coord_name):
 
 
 def find_match_obj_at_time(
-    traj_iobj: xr.Dataset,
+    traj_iobj: Union[xr.Dataset, dict],
     b_test,
-    traj_box: xr.Dataset,
-    match_traj: xr.Dataset,
+    # traj_box: xr.Dataset,
+    match_traj: Union[xr.Dataset, dict],
     match_traj_bounds: xr.Dataset,
     matching_objects_at_time: Union[dict, None],
     all_matching_objects: dict,
     match_time_back: float,
     fast: bool = True,
+    use_numpy: bool = False,
 ) -> (Union[dict, None], dict):
 
-    nx = int(round(match_traj.attrs["Lx"] / match_traj.attrs["dx"]))
-    ny = int(round(match_traj.attrs["Ly"] / match_traj.attrs["dy"]))
+    nx = int(round(match_traj_bounds.attrs["Lx"] / match_traj_bounds.attrs["dx"]))
+    ny = int(round(match_traj_bounds.attrs["Ly"] / match_traj_bounds.attrs["dy"]))
 
     b_set = box_bounds(match_traj_bounds.sel(time=match_time_back))
 
@@ -389,10 +394,32 @@ def find_match_obj_at_time(
                 matching_objects_at_match_time[o] = None
             all_matching_objects[o] = None
     else:
-        traj_iobj_time = traj_iobj.sel(time=match_time_back)
-        match_traj_time = match_traj.sel(time=match_time_back)
+        if use_numpy:
 
-        objs = find_refined_overlap(traj_iobj_time, match_traj_time, obj_labels)
+            traj_iobj_time = tr_data_at_time(traj_iobj, match_time_back)
+            # ind1 = np.where(traj_iobj['time'] == match_time_back)[0][0]
+            # traj_iobj_time = {'xyz':traj_iobj['xyz'][:, ind1, :],
+            #                   'mask': traj_iobj['mask'][ind1, :],
+            #                   'object_label': traj_iobj['object_label'],
+            #                   }
+
+            match_traj_time = tr_data_at_time(match_traj, match_time_back)
+            # ind2 = np.where(match_traj['time'] == match_time_back)[0][0]
+            # match_traj_time = {'xyz': match_traj['xyz'][:, ind2, :],
+            #                    'mask': match_traj['mask'][ind2, :],
+            #                    'object_label': match_traj['object_label'],
+            #                   }
+
+            objs = find_refined_overlap_fast(
+                traj_iobj_time, match_traj_time, obj_labels, nx, ny
+            )
+
+        else:
+            traj_iobj_time = traj_iobj.sel(time=match_time_back)
+            match_traj_time = match_traj.sel(time=match_time_back)
+
+            objs = find_refined_overlap(traj_iobj_time, match_traj_time, obj_labels)
+
         for o, overlap in objs:
             if matching_objects_at_time is not None:
                 matching_objects_at_match_time[o] = overlap
@@ -416,6 +443,7 @@ def find_matching_objects(
     match_traj_bounds: xr.Dataset,
     ref_time_only: bool = True,
     fast: bool = True,
+    use_numpy: bool = False,
 ) -> dict:
     """
     Find objects in one set of trajectories overlapping one object in another.
@@ -454,7 +482,7 @@ def find_matching_objects(
     all_matching_objects = {}
 
     if ref_time_only:
-        match_time_back = match_traj.ref_time.item()
+        match_time_back = match_traj_bounds.ref_time.item()
         b_test = traj_box.sel(time=match_time_back)
         if np.isnan(b_test.x_min).item():
             # print(f"No points in master trajectory {iobj=} "
@@ -463,13 +491,14 @@ def find_matching_objects(
         (dummy, all_matching_objects) = find_match_obj_at_time(
             traj_iobj,
             b_test,
-            traj_box,
+            # traj_box,
             match_traj,
             match_traj_bounds,
             None,
             all_matching_objects,
             match_time_back,
             fast=fast,
+            use_numpy=use_numpy,
         )
 
         if len(all_matching_objects) > 0:
@@ -506,6 +535,7 @@ def find_matching_objects(
                 all_matching_objects,
                 match_time_back,
                 fast=fast,
+                use_numpy=use_numpy,
             )
 
         if len(all_matching_objects) > 0:
@@ -522,6 +552,7 @@ def find_matching_objects_ref(
     forward: bool = True,
     adjacent_only: bool = True,
     fast: bool = True,
+    use_numpy=False,
 ) -> dict:
     """
     Generate a dict of objects in a trajectory family matching selected objects
@@ -592,6 +623,9 @@ def find_matching_objects_ref(
     if select is None:
         select = traj_bounds.object_label.values
 
+    if not fast and use_numpy:
+        traj = tr_objects_to_numpy(traj, to_gridpoint=True)
+
     mol = {}
 
     # Iterate over objects in master_ref.
@@ -601,7 +635,17 @@ def find_matching_objects_ref(
 
         traj_iobj_bounds = traj_bounds.sel(object_label=iobj)
         if not fast:
-            traj_iobj = traj.where(traj.object_label == iobj, drop=True)
+            if use_numpy:
+                traj_iobj = tr_data_obj(traj, iobj)
+                # m = traj['object_label'] == iobj
+                # traj_iobj = {'xyz': traj['xyz'][..., m],
+                #              'mask': traj['mask'][..., m],
+                #              'ref_time': traj['ref_time'],
+                #              'time': traj['time'],
+                #              'object_label':[iobj],
+                #             }
+            else:
+                traj_iobj = traj.where(traj.object_label == iobj, drop=True)
         else:
             traj_iobj = None
 
@@ -627,6 +671,8 @@ def find_matching_objects_ref(
             # matching_objects[match_time] will be those objects in match_traj
             # which match traj at any time.
 
+            if not fast and use_numpy:
+                match_traj = tr_objects_to_numpy(match_traj, to_gridpoint=True)
             matching_objects_at_time = find_matching_objects(
                 iobj,
                 traj_iobj,
@@ -635,6 +681,7 @@ def find_matching_objects_ref(
                 match_traj_bounds,
                 ref_time_only=ref_time_only,
                 fast=fast,
+                use_numpy=use_numpy,
             )
             if matching_objects_at_time:
                 matching_objects[match_time] = matching_objects_at_time
@@ -656,6 +703,7 @@ def find_family_matching_objects(
     forward: bool = True,
     adjacent_only: bool = True,
     fast: bool = True,
+    use_numpy=False,
 ) -> dict:
     """
     Generate a dictionary of all objects in a family of trajectories
@@ -705,10 +753,50 @@ def find_family_matching_objects(
             forward=forward,
             adjacent_only=adjacent_only,
             fast=fast,
+            use_numpy=use_numpy,
         )
         mol_family[float(master_ref_time)] = mol
 
     return mol_family
+
+
+def find_refined_overlap_fast(traj1, traj2, obj_labels, nx, ny):
+    """
+    Compute fractional overlap between object in traj1 and requested objects
+    in traj2.
+
+    Parameters
+    ----------
+    traj1 : xr.Dataset
+        Trajectories from a single object.
+    traj2 : xr.Dataset
+       Trajectories containing objects with ids in obj_labels.
+    obj_labels : list
+       List of object ids required to find overlap with object in traj1.
+
+    Returns
+    -------
+    list(tuple)
+        List of (obj_labels, overlap).
+
+    """
+    over = []
+    tr2ol = traj2["object_label"]
+
+    for objm in obj_labels:
+
+        # print(f"{b_set.sel(object_label=objm)=}")
+        m = tr2ol == objm
+
+        traj2_obj = {"xyz": traj2["xyz"][:, m], "mask": traj2["mask"][m]}
+
+        inter = refine_object_overlap_fast(traj1, traj2_obj, nx, ny)
+
+        over.append(inter)
+        # over.append((objm, inter))
+
+    return list(zip(obj_labels, over))
+    # return over
 
 
 def find_refined_overlap(traj1, traj2, obj_labels):

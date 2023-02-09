@@ -1,6 +1,12 @@
 # Notes on this branch.
 
 ## New in this commit.
+
+- Added option `use_numpy=True` to `find_family_matching_objects` to speed up the overlap estimation. This converts `xarray` `Datasets` to `numpy` arrays in a dictionary internally. The overall code has been tested on the BOMEX test data; it yields bit-reproducible results with about a factor of 7 speedup.
+- Note that some of the functionality added has been implemented in the [cohobj](https://github.com/ParaConUK/cohobj) package; users will need to upgrade this.
+- Note also that I have changed `obj_mask` to `object_mask` for consistency with `object_label`.
+
+## New in last commit.
 - Added some functionality to generate graphs of related objects; see [Graphs of related objects](#graphs-of-related-objects).
 
 - Simplified `plot.plot_trajectory_animation.plot_family_animation` to not depend on or use matching object dictionaries; it now accepts a list of objects in the form (time:float, object_number:int) to selct objects in the family to plot.
@@ -9,7 +15,7 @@
 
 ##  Introduction
 
-This branch contains the following, related, subpackages:
+This branch contains the following, related, sub-packages:
 - `plot`
 - `classify`
 - `family`

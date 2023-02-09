@@ -8,10 +8,12 @@ import glob
 import pickle
 import time
 
+import numpy as np
+
 # import matplotlib.pyplot as plt
 # import networkx as nx
 import xarray as xr
-from cohobj.object_tools import get_bounding_boxes
+from cohobj.object_tools import get_bounding_boxes  # , tr_objects_to_numpy
 from load_data import load_data
 
 from advtraj.family.traj_family import (  # subgraph_overlap_thresh,
@@ -30,8 +32,7 @@ from advtraj.family.traj_family import (  # subgraph_overlap_thresh,
 )
 from advtraj.plot.plot_trajectory_animation import plot_family_animation
 
-# import numpy as np
-
+# %%
 
 case = "cloud"
 
@@ -60,7 +61,7 @@ else:
 
 output_path = odir + f"{file_prefix}trajectories_{case}_{interp_order}_{minim}_{expt}"
 
-traj_path_list = list(glob.glob(f"{output_path}_[0-9][0-9].nc"))  # [30:50]
+traj_path_list = list(glob.glob(f"{output_path}_[0-9][0-9].nc"))[35:45]  # [30:50]
 
 family_times = analyse_traj_family(traj_path_list)
 summary = summarise_traj_family(family_times)
@@ -87,7 +88,7 @@ for path in traj_path_list:
         w_max = ds_data.w.sel(time=ds.ref_time).max()
 
         mask = ds_data.w > 0.9 * w_max
-        mask.name = "obj_mask"
+        mask.name = "object_mask"
 
     elif case == "cloud":
 
@@ -96,7 +97,7 @@ for path in traj_path_list:
         thresh = 1e-5
 
         mask = ds_data.q_cloud_liquid_mass > thresh
-        mask.name = "obj_mask"
+        mask.name = "object_mask"
 
     dsm = xr.merge((ds, mask))
     # dsm = xr.merge((ds, ds_data, mask))
@@ -117,7 +118,7 @@ if case == "w":
     )
 
     mask_field = ds_field.w > 0.9 * w_max
-    mask_field.name = "obj_mask"
+    mask_field.name = "object_mask"
 
 elif case == "cloud":
     ds_field = load_data(
@@ -132,18 +133,22 @@ elif case == "cloud":
     thresh = 1e-5
 
     mask_field = ds_field.q_cloud_liquid_mass > thresh
-    mask_field.name = "obj_mask"
+    mask_field.name = "object_mask"
 
+# %%
 
-time1 = time.perf_counter()
-
-obj_file = "_objects_ref"
+obj_file = "_objects_small_np"
 pkl_file = output_path + obj_file + ".pkl"
+pkl_file2 = output_path + obj_file + "_2.pkl"
 
-find_mol = False
+
+find_mol = True
+
+compare_methods = True
 
 if find_mol:
 
+    time1 = time.perf_counter()
     mol_fam = find_family_matching_objects(
         ds_list,
         ref_time_only=True,
@@ -153,13 +158,44 @@ if find_mol:
         adjacent_only=False,
         # fast=True,
         fast=False,
+        use_numpy=False,
     )
+    time2 = time.perf_counter()
+    delta_t = time2 - time1
+    print(f"Elapsed time = {delta_t}")
 
     with open(pkl_file, "wb") as fp:
 
         pickle.dump(mol_fam, fp)
 
         print("Done writing matching objects to pickle file.")
+
+    # Test use_numpy
+    if compare_methods:
+
+        time1 = time.perf_counter()
+        mol_fam2 = find_family_matching_objects(
+            ds_list,
+            ref_time_only=True,
+            # ref_time_only=False,
+            # forward=False,
+            # adjacent_only=True,
+            adjacent_only=False,
+            # fast=True,
+            fast=False,
+            use_numpy=True,
+        )
+        time2 = time.perf_counter()
+        delta_t2 = time2 - time1
+        print(f"Elapsed time = {delta_t2}")
+
+        with open(pkl_file2, "wb") as fp:
+
+            pickle.dump(mol_fam, fp)
+
+            print("Done writing matching objects to pickle file.")
+
+        print(f"Elapsed time ratio = {delta_t / delta_t2}")
 
 else:
 
@@ -169,10 +205,34 @@ else:
 
         print("Done reading matching objects from pickle file.")
 
-time2 = time.perf_counter()
-delta_t = time2 - time1
+# %%
+# Are the two methods giving the same results?
+if mol_fam == mol_fam2:
+    for key, val in mol_fam.items():
+        # print(key)
+        if mol_fam2[key] != val:
+            break
+        val2 = mol_fam2[key]
+        for obj, match in val["matching_objects"].items():
+            # print(obj)
+            if val2["matching_objects"][obj] != match:
+                break
+            match2 = val2["matching_objects"][obj]
+            for tm, mobj in match.items():
+                if match2[tm] != mobj:
+                    break
+                mobj2 = match2[tm]
+                for mtime, o in mobj.items():
+                    if mobj2[mtime] != o:
+                        break
+                    o2 = mobj2[mtime]
+                    for oo, over in o.items():
+                        over2 = o2[oo]
+                        if np.abs(over - over2) > 1e-8:
+                            print(obj, tm, mtime, oo, over, over2, over - over2)
+                    # print('All match OK')
 
-
+# %%
 G = graph_matching_objects(mol_fam, include_types=(1, 2))
 print_matching_objects_graph(G)
 
@@ -180,9 +240,10 @@ print(start_objects(G))
 
 draw_object_graph(G, ntypes=(1, 2), save_file=output_path + obj_file + "_all.png")
 
-
+# %%
 # node_sel = (23400.0, 17)
-node_sel = (23160.0, 9)
+# node_sel = (23160.0, 9)
+node_sel = (23220.0, 19)
 
 mol = mol_fam[node_sel[0]]
 nodelist = matching_obj_to_nodelist(
@@ -216,8 +277,9 @@ print_matching_objects(
 )
 print(f"Elapsed time = {delta_t}")
 # %%
-for vp in [(0, 0), (0, 90), (90, 0), (45, 140)]:
-    # for vp in [(0, 0)]:
+# for vp in []:
+# for vp in [(0, 0), (0, 90), (90, 0), (45, 140)]:
+for vp in [(0, 0)]:
     anim = plot_family_animation(
         ds_list,
         # field_mask = mask_field,

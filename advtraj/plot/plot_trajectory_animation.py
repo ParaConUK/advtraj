@@ -114,7 +114,7 @@ def plot_traj_animation(
     anim_name : str, optional
         File name for animation. None generated if None. The default is None.
     plot_mask : bool, optional
-        Plot points with inobj_size where obj_mask is True.
+        Plot points with inobj_size where object_mask is True.
     with_boxes : bool, optional
         Display bounding boxes. The default is False.
     load_ds : bool, optional
@@ -143,8 +143,8 @@ def plot_traj_animation(
     plot_class = class_no is not None
     plot_field = field_mask is not None
 
-    if plot_mask and "obj_mask" not in ds_traj.variables:
-        print("Data does not contain obj_mask: plot_mask set to False.")
+    if plot_mask and "object_mask" not in ds_traj.variables:
+        print("Data does not contain object_mask: plot_mask set to False.")
         plot_mask = False
 
     if plot_class:
@@ -160,7 +160,7 @@ def plot_traj_animation(
     var = ["x", "y", "z"]
 
     if plot_mask:
-        var.append("obj_mask")
+        var.append("object_mask")
 
     ds = ds_traj[var]
 
@@ -369,9 +369,9 @@ def plot_family_animation(
     figsize : tuple (width, height), optional
         Size of figure. The default is (20,12).
     not_inobj_size : float, optional
-        Size of blob when obj_mask = False. The default is 0.2.
+        Size of blob when object_mask = False. The default is 0.2.
     inobj_size : float, optional
-        Size of blob when obj_mask = True. The default is 2.0.
+        Size of blob when object_mask = True. The default is 2.0.
     field_size : float, optional
         Size of blob when field_mask = True.. The default is 0.5.
     fps : float or int, optional
@@ -379,7 +379,7 @@ def plot_family_animation(
     anim_name : str, optional
         File name for animation. None generated if None. The default is None.
     plot_mask : bool, optional
-        Plot points with inobj_size where obj_mask is True.
+        Plot points with inobj_size where object_mask is True.
     with_boxes : bool, optional
         Display bounding boxes. The default is False.
     load_ds : bool, optional
@@ -431,8 +431,8 @@ def plot_family_animation(
 
     traj_master = traj_family[master_ref]
 
-    if plot_mask and "obj_mask" not in traj_master.variables:
-        print("Data does not contain obj_mask: plot_mask set to False.")
+    if plot_mask and "object_mask" not in traj_master.variables:
+        print("Data does not contain object_mask: plot_mask set to False.")
         plot_mask = False
 
     # Find times for whole plot.
@@ -829,7 +829,7 @@ def _update_obj_plot(
     x, y, z = _get_xyz(traj, itime, xlim, ylim, Lx, Ly, galilean, timestep)
 
     if plot_mask:
-        mask = traj.obj_mask
+        mask = traj.object_mask
     else:
         mask = None
 
@@ -900,7 +900,7 @@ def _update_family_obj_plot(
             )
             x, y, z = _get_xyz(traj, itime, xlim, ylim, Lx, Ly, galilean, timestep)
             if plot_mask:
-                mask = traj.obj_mask >= 1
+                mask = traj.object_mask >= 1
             else:
                 mask = None
             # print(f'{len(x)}')
