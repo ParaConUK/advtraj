@@ -80,6 +80,7 @@ def plot_traj_animation(
     y_lim=None,
     z_lim=None,
     colors=None,
+    ncolmax=6,
 ):
     """
     Plot animated trajectory points in 3D.
@@ -216,7 +217,7 @@ def plot_traj_animation(
         legend_title = "Object Number"
 
     if legend:
-        plt.legend(title=legend_title, loc="upper right", ncol=3)
+        plt.legend(title=legend_title, loc="upper center", ncol=ncolmax)
 
     # animation function.  This is called sequentially
     def animate_trplt(itime):
@@ -305,23 +306,36 @@ def plot_traj_animation(
 
         return
 
-    #    Writer = animation.writers['ffmpeg']
-    #    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-    anim = animation.FuncAnimation(
-        fig, animate_trplt, frames=ntimes, interval=1000.0 / fps, blit=False
-    )
+    if fps <= 0:
+        a_type = anim_name.split(".")[-1]
+        a_name = "".join(anim_name.split(".")[:-1])
+        fstr = "_{:0" + f"{round(np.log10(ntimes))}" + "d}"
+        for frame in range(ntimes):
+            animate_trplt(frame)
 
-    plt.show()
+            fname = a_name + fstr.format(frame) + "." + a_type
+            plt.savefig(fname)
 
-    if anim_name is not None:
-        anim_type = anim_name.split(".")[-1]
-        if anim_type == "gif":
-            anim.save(anim_name, writer="imagemagick", fps=fps)
-        elif anim_type == "mp4":
-            anim.save(anim_name, fps=fps)
+        return fig
+    else:
 
-    # if save_anim : #, extra_args=['-vcodec', 'libx264'])
-    return anim
+        #    Writer = animation.writers['ffmpeg']
+        #    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+        anim = animation.FuncAnimation(
+            fig, animate_trplt, frames=ntimes, interval=1000.0 / fps, blit=False
+        )
+
+        plt.show()
+
+        if anim_name is not None:
+            anim_type = anim_name.split(".")[-1]
+            if anim_type == "gif":
+                anim.save(anim_name, writer="imagemagick", fps=fps)
+            elif anim_type == "mp4":
+                anim.save(anim_name, fps=fps)
+
+        # if save_anim : #, extra_args=['-vcodec', 'libx264'])
+        return anim
 
 
 def plot_family_animation(
@@ -346,6 +360,7 @@ def plot_family_animation(
     y_lim=None,
     z_lim=None,
     colors=None,
+    ncolmax=6,
 ):
     """
     Plot animated trajectory family points in 3D.
@@ -479,15 +494,12 @@ def plot_family_animation(
         inobj_size,
         with_boxes,
         colors,
-        # ref_times_sel=ref_times_sel,
-        # overlap_thresh=overlap_thresh,
     )
 
     legend_title = "Object (Ref Time: Number)"
 
     if legend:
-        ncolmax = 6
-        plt.legend(title=legend_title, loc="upper right", ncol=min(nplt, ncolmax))
+        plt.legend(title=legend_title, loc="upper center", ncol=min(nplt, ncolmax))
 
     # animation function.  This is called sequentially
     def animate_trfplt(itime):
@@ -552,21 +564,34 @@ def plot_family_animation(
     #    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
     # anim = animate_trplt(0)
 
-    anim = animation.FuncAnimation(
-        fig, animate_trfplt, frames=ntimes, interval=1000.0 / fps, blit=False
-    )
+    if fps <= 0:
+        a_type = anim_name.split(".")[-1]
+        a_name = "".join(anim_name.split(".")[:-1])
+        fstr = "_{:0" + f"{round(np.log10(ntimes))}" + "d}"
+        for frame in range(ntimes):
+            animate_trfplt(frame)
 
-    plt.show()
+            fname = a_name + fstr.format(frame) + "." + a_type
+            plt.savefig(fname)
 
-    if anim_name is not None:
-        anim_type = anim_name.split(".")[-1]
-        if anim_type == "gif":
-            anim.save(anim_name, writer="imagemagick", fps=fps)
-        elif anim_type == "mp4":
-            anim.save(anim_name, fps=fps)
+        return fig
+    else:
 
-    # if save_anim : #, extra_args=['-vcodec', 'libx264'])
-    return anim
+        anim = animation.FuncAnimation(
+            fig, animate_trfplt, frames=ntimes, interval=1000.0 / fps, blit=False
+        )
+
+        plt.show()
+
+        if anim_name is not None:
+            anim_type = anim_name.split(".")[-1]
+            if anim_type == "gif":
+                anim.save(anim_name, writer="imagemagick", fps=fps)
+            elif anim_type == "mp4":
+                anim.save(anim_name, fps=fps)
+
+        # if save_anim : #, extra_args=['-vcodec', 'libx264'])
+        return anim
 
 
 # ########### Functions below are support of overall plotting. ##########

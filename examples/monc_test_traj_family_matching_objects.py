@@ -16,21 +16,13 @@ import xarray as xr
 from cohobj.object_tools import get_bounding_boxes  # , tr_objects_to_numpy
 from load_data import load_data
 
-from advtraj.family.traj_family import (  # subgraph_overlap_thresh,
-    analyse_traj_family,
-    draw_object_graph,
-    find_family_matching_objects,
-    graph_matching_objects,
-    matching_obj_to_nodelist,
-    print_matching_objects,
-    print_matching_objects_graph,
-    related_objects,
-    start_objects,
-    subgraph_ntype,
-    summarise_traj_family,
-    traj_name_to_data_name,
-)
+import advtraj.family.traj_family as fm
 from advtraj.plot.plot_trajectory_animation import plot_family_animation
+
+# %%
+
+# %%
+
 
 # %%
 
@@ -61,10 +53,10 @@ else:
 
 output_path = odir + f"{file_prefix}trajectories_{case}_{interp_order}_{minim}_{expt}"
 
-traj_path_list = list(glob.glob(f"{output_path}_[0-9][0-9].nc"))[35:45]  # [30:50]
+traj_path_list = list(glob.glob(f"{output_path}_[0-9][0-9].nc"))  # [35:45]  # [30:50]
 
-family_times = analyse_traj_family(traj_path_list)
-summary = summarise_traj_family(family_times)
+family_times = fm.analyse_traj_family(traj_path_list)
+summary = fm.summarise_traj_family(family_times)
 summary
 
 ds_list = []
@@ -79,7 +71,7 @@ for path in traj_path_list:
     time_min = min(time_min, ds.time.values.min())
     time_max = max(time_max, ds.time.values.max())
 
-    data_file = traj_name_to_data_name(path, append=False)
+    data_file = fm.traj_name_to_data_name(path, append=False)
     print(data_file)
     ds_data = xr.open_dataset(data_file)
 
@@ -137,19 +129,20 @@ elif case == "cloud":
 
 # %%
 
-obj_file = "_objects_small_np"
+# obj_file = "_objects_small_np"
+obj_file = "_objects_ref"
 pkl_file = output_path + obj_file + ".pkl"
 pkl_file2 = output_path + obj_file + "_2.pkl"
 
 
-find_mol = True
+find_mol = False
 
-compare_methods = True
+compare_methods = False
 
 if find_mol:
 
     time1 = time.perf_counter()
-    mol_fam = find_family_matching_objects(
+    mol_fam = fm.find_family_matching_objects(
         ds_list,
         ref_time_only=True,
         # ref_time_only=False,
@@ -174,7 +167,7 @@ if find_mol:
     if compare_methods:
 
         time1 = time.perf_counter()
-        mol_fam2 = find_family_matching_objects(
+        mol_fam2 = fm.find_family_matching_objects(
             ds_list,
             ref_time_only=True,
             # ref_time_only=False,
@@ -207,7 +200,7 @@ else:
 
 # %%
 # Are the two methods giving the same results?
-if mol_fam == mol_fam2:
+if compare_methods and mol_fam == mol_fam2:
     for key, val in mol_fam.items():
         # print(key)
         if mol_fam2[key] != val:
@@ -233,53 +226,64 @@ if mol_fam == mol_fam2:
                     # print('All match OK')
 
 # %%
-G = graph_matching_objects(mol_fam, include_types=(1, 2))
-print_matching_objects_graph(G)
+G = fm.graph_matching_objects(mol_fam, include_types=(1, 2))
+fm.print_matching_objects_graph(G)
 
-print(start_objects(G))
+print(fm.start_objects(G))
 
-draw_object_graph(G, ntypes=(1, 2), save_file=output_path + obj_file + "_all.png")
+fm.draw_object_graph(G, ntypes=(1, 2), save_file=output_path + obj_file + "_all.png")
 
 # %%
 # node_sel = (23400.0, 17)
-# node_sel = (23160.0, 9)
-node_sel = (23220.0, 19)
+node_sel = (23160.0, 9)
+# node_sel = (23220.0, 19)
 
 mol = mol_fam[node_sel[0]]
-nodelist = matching_obj_to_nodelist(
+nodelist = fm.matching_obj_to_nodelist(
     mol, node_sel[1], ref_times_sel=None, overlap_thresh=None
 )
 
-nodelist = related_objects(G, node_sel)  # , overlap_thresh = 0.1)
+nodelist = fm.related_objects(G, node_sel)  # , overlap_thresh = 0.1)
 
-draw_object_graph(
+fm.draw_object_graph(
     G,
     nodelist=nodelist,
     highlight_nodes=[node_sel],
     ntypes=(1, 2),
-    save_file=output_path + obj_file + ".png",
+    save_file=output_path + obj_file + ".pdf",
 )
 
-G1 = subgraph_ntype(G, 1)
+G1 = fm.subgraph_ntype(G, 1)
 # , overlap_thresh = 0.1)
-nodelist1 = related_objects(G1, node_sel)  # , overlap_thresh = 0.1)
+nodelist1 = fm.related_objects(G1, node_sel)  # , overlap_thresh = 0.1)
 
-draw_object_graph(
+fm.draw_object_graph(
     G1,
     nodelist=nodelist1,
     highlight_nodes=[node_sel],
     ntypes=(1, 2),
-    save_file=output_path + obj_file + ".png",
+    save_file=output_path + obj_file + ".pdf",
 )
 
-print_matching_objects(
+fm.print_matching_objects(
     mol, select=[node_sel[1]], ref_times_sel=[node_sel[0]], full=True
 )
-print(f"Elapsed time = {delta_t}")
+
+
 # %%
-# for vp in []:
-# for vp in [(0, 0), (0, 90), (90, 0), (45, 140)]:
+nodelist_for_paper = [
+    (23220.0, 19),
+    (23280.0, 18),
+    (23280.0, 19),
+    (23280.0, 22),
+    (23400.0, 15),
+    (23400.0, 18),
+    (23400.0, 19),
+    (23460.0, 9),
+]
 for vp in [(0, 0)]:
+    # for vp in [(0, 0), (0, 90), (90, 0), (45, 140)]:
+    # for vp in [(0, 0), (0, -90)]:
     anim = plot_family_animation(
         ds_list,
         # field_mask = mask_field,
@@ -287,21 +291,25 @@ for vp in [(0, 0)]:
         highlight_obj=[node_sel],
         galilean=(-8, -1.5),
         title="Trajectory Family",
-        legend=True,
+        # legend=True,
+        legend=False,
         figsize=(15, 12),
         not_inobj_size=0.5,
         inobj_size=2.0,
         field_size=4.0,
+        # fps=-1,
         fps=5,
+        # anim_name=f"Family_plot_mask_related{obj_file}_nt1_{vp[0]:03d}_{vp[1]:03d}.pdf",
         anim_name=f"../animations/Family_plot_mask_related{obj_file}_nt1_{vp[0]:03d}_{vp[1]:03d}.gif",
         with_boxes=False,
         plot_mask=True,
         load_ds=True,
         view_point=vp,
-        # x_lim=[3000, 6000],
-        x_lim=[2000, 8400],
-        # y_lim=[4000, 8000],
-        # y_lim=[3000, 8000],
-        # z_lim = None,
-        # colors=['k', 'r','g','b'],
+        # x_lim=[2000, 4000],
+        # x_lim=[2000, 8400],
+        # y_lim=[6500, 8500],
+        # y_lim=[0, 2000],
+        # z_lim = [0, 2500],
+        # colors=['k', 'r','g','b','magenta','orange','cyan','olive'],
+        ncolmax=4,
     )
