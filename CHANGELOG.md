@@ -16,6 +16,10 @@
 - fix ci/cd issues with pre-commit linting due to breaking change in flake8 integration
   [\#30](https://github.com/ParaConUK/advtraj/pull/30) @leifdenby
 
+- fix deprecation of requirement package name `sklearn` by instead requiring
+  the new package name `scikit-learn`.
+  [\#31](https://github.com/ParaConUK/advtraj/pull/31) @leifdenby
+
 
 ## [v0.5.1](https://github.com/ParaConUK/advtraj/tree/v0.5.1)
 
