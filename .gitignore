@@ -118,3 +118,6 @@ test_data
 .*.sw*
 
 source/
+
+# test data
+uclales.advtraj.testdata.tar.gz
