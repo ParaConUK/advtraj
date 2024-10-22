@@ -15,10 +15,34 @@ import xarray as xr
 def set_traj_class(mask):
     """
     Compute trajectory classification.
+    mask.ref_time contains the reference time; points with mask true at this time
+    are counted as "In" the class labelled 0. The code then works backwards and
+    forwards looking for changes in the mask, decrementing and incrementing,
+    respectively, the class number with each change.
+
+    The returned key identifies "In" objects (i.e. where mask is true) counting
+    backwards and forwards, periods in between as either 'pre-' object (backwards)
+    or 'post-' object (forwards). For example, the following timeseries:
+    FFFFFFFTTTTTTTFFFFFFFFFFTTTTTTTTFFFFFFFTTTTT*TTTTTTTTFFFFFFFFTTTTTTTTFFFFFFFFTTTTTTTTTFFFFFFFF
+    with ref_time starred, returns
+    |..-5..|.-4..||...-3...||..-2..||.-1..||....0.......||...1..||...2..||...3..||...4...||...5..|
+    with key
+    -5 : ("Pre",-2)
+    -4 : ("In", -2)
+    -3 : ("Pre",-1)
+    -2 : ("In", -1)
+    -1 : ("Pre", 0)
+     0 : ("In",  0)
+     1 : ("Post",0)
+     2 : ("In",  1)
+     3 : ("Post",1)
+     4 : ("In",  2)
+     5 : ("Post",2)
 
     Args
     ----
-        mask: xarray DataArray contain timeseries of mask data.
+        mask: xarray DataArray containing timeseries of mask data.
+
 
     Returns
     -------
