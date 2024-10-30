@@ -1,10 +1,4 @@
 
-traj_family_049_089_040_030
-
-traj_family_088_089_040_030
-
-traj_family*
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -112,9 +106,10 @@ venv.bak/
 # Test data
 test_data
 *.nc
-*.png
 
 # vim temporary files
 .*.sw*
+
+*.backup
 
 source/
