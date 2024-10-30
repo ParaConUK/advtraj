@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/ParaConUK/advtraj/tree/HEAD)
 
-[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.1...HEAD)
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.2...HEAD)
+
+## [v0.5.2](https://github.com/ParaConUK/advtraj/tree/v0.5.2)
+
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.1...v0.5.2)
+
+*new features*
+
+- Added `advtraj.classify.traj_classify` module to facilitate classification along trajectories (e.g. in cloud, entrained etc.).
 
 *maintenance*
 
