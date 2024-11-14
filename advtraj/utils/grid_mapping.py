@@ -1,6 +1,6 @@
 """
 Utilities for mapping to and from "position scalars" (which encode the position
-as grid indecies) to positions in real space
+as grid indices) to positions in real space
 """
 
 import numpy as np
@@ -12,7 +12,7 @@ from .interpolation import map_1d_grid_index_to_position
 def _calculate_phase(vr, vi, n_grid):
     """
     Function to convert real and imaginary points to location on grid
-    size n_grid. Because we assume the grid indecies refer to cell-centered
+    size n_grid. Because we assume the grid indices refer to cell-centered
     positions we allow the grid-index to go down to -0.5 (which would
     correspond to the left-most of the domain). To support staggered variables
     this should be adapted.
@@ -34,10 +34,10 @@ def _calculate_phase(vr, vi, n_grid):
     return vpos
 
 
-def _estimate_dim_initial_grid_indecies(ds_position_scalars, dim, xy_periodic, n_grid):
+def _estimate_dim_initial_grid_indices(ds_position_scalars, dim, xy_periodic, n_grid):
     """
     Using the position scalars in `ds_position_scalars` estimate the grid
-    locations (in indecies) where the fluid was initially located when the
+    locations (in indices) where the fluid was initially located when the
     position scalars were initiated.
 
     Note: assumes zeroth grid point has zero phase.
@@ -54,10 +54,10 @@ def _estimate_dim_initial_grid_indecies(ds_position_scalars, dim, xy_periodic, n
     return grid_idx
 
 
-def estimate_initial_grid_indecies(ds_position_scalars, N_grid=dict()):
+def estimate_initial_grid_indices(ds_position_scalars, N_grid=dict()):
     """
     Using the position scalars `ds_position_scalars` estimate the original grid
-    locations (ijk-indecies) that the position scalars were advected from
+    locations (ijk-indices) that the position scalars were advected from
     """
     if "xy_periodic" not in ds_position_scalars.attrs:
         raise Exception(
@@ -74,33 +74,27 @@ def estimate_initial_grid_indecies(ds_position_scalars, N_grid=dict()):
             " dictionary `N_grid=dict(x=<nx>, y=<ny>)`)"
         )
 
-    da_i_idx = _estimate_dim_initial_grid_indecies(
-        ds_position_scalars=ds_position_scalars,
-        dim="x",
-        xy_periodic=xy_periodic,
-        n_grid=N_grid.get("x"),
-    )
-    da_j_idx = _estimate_dim_initial_grid_indecies(
-        ds_position_scalars=ds_position_scalars,
-        dim="y",
-        xy_periodic=xy_periodic,
-        n_grid=N_grid.get("y"),
-    )
-    da_k_idx = _estimate_dim_initial_grid_indecies(
-        ds_position_scalars=ds_position_scalars,
-        dim="z",
-        xy_periodic=None,
-        n_grid=None,
-    )
-    return xr.merge([da_i_idx, da_j_idx, da_k_idx])
+    da_indices = []
+    for dim in "xyz":
+
+        da_indices.append(
+            _estimate_dim_initial_grid_indices(
+                ds_position_scalars=ds_position_scalars,
+                dim=dim,
+                xy_periodic=xy_periodic,
+                n_grid=N_grid.get(dim),
+            )
+        )
+
+    return xr.merge(da_indices)
 
 
-def estimate_3d_position_from_grid_indecies(ds_grid, i, j, k, interp_order=1):
+def estimate_3d_position_from_grid_indices(ds_grid, i, j, k, interp_order=1):
     """
-    Using the 3D grid positions (in real units, not grid indecies) defined in
+    Using the 3D grid positions (in real units, not grid indices) defined in
     `ds_grid` (through coordinates `x`, `y` and `z`) interpolate the "grid
-    indecies" in `ds_grid_indecies` (these may be fractional, i.e. they are
-    not discrete integer grid indecies) to the real x, y and z-positions.
+    indices" in `ds_grid_indices` (these may be fractional, i.e. they are
+    not discrete integer grid indices) to the real x, y and z-positions.
     """
 
     x_pos = map_1d_grid_index_to_position(i, da_coord=ds_grid.x)
@@ -113,15 +107,15 @@ def estimate_3d_position_from_grid_indecies(ds_grid, i, j, k, interp_order=1):
     if isinstance(i, xr.DataArray):
         assert i.dims == j.dims == k.dims
         ds = xr.Dataset(coords=i.coords)
-        ds["x_est"] = i.dims, x_pos
-        ds["y_est"] = j.dims, y_pos
-        ds["z_est"] = k.dims, z_pos
+        ds["x"] = i.dims, x_pos
+        ds["y"] = j.dims, y_pos
+        ds["z"] = k.dims, z_pos
         return ds
     else:
         return [x_pos, y_pos, z_pos]
 
 
-def grid_indecies_to_position_scalars(i, j, k, nx, ny, nz, xy_periodic):
+def grid_indices_to_position_scalars(i, j, k, nx, ny, nz, xy_periodic):
     """
     Based off `reinitialise_trajectories` in
     `components/tracers/src/tracers.F90` in the MONC model source code
@@ -143,9 +137,10 @@ def grid_indecies_to_position_scalars(i, j, k, nx, ny, nz, xy_periodic):
 
 
 def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
-    nx = int(ds_grid.x.count())
-    ny = int(ds_grid.y.count())
-    nz = int(ds_grid.z.count())
+
+    nx = int(ds_grid.x.size)
+    ny = int(ds_grid.y.size)
+    nz = int(ds_grid.z.size)
 
     if ds_pts is None:
         i = np.arange(nx)
@@ -153,10 +148,10 @@ def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
         k = np.arange(nz)
 
         i_, j_, k_ = np.meshgrid(i, j, k, indexing="ij")
-        ds_indecies = ds_grid.copy()
-        ds_indecies["i"] = ("x", "y", "z"), i_
-        ds_indecies["j"] = ("x", "y", "z"), j_
-        ds_indecies["k"] = ("x", "y", "z"), k_
+        ds_indices = ds_grid.copy()
+        ds_indices["i"] = ("x", "y", "z"), i_
+        ds_indices["j"] = ("x", "y", "z"), j_
+        ds_indices["k"] = ("x", "y", "z"), k_
     else:
 
         dx = ds_grid.x.dx
@@ -167,17 +162,17 @@ def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
         j_ = (ds_pts.y - ds_grid.y.min()) / dy
         k_ = (ds_pts.z - ds_grid.z.min()) / dz
 
-        ds_indecies = ds_pts.copy()
-        ds_indecies["i"] = i_
-        ds_indecies["j"] = j_
-        ds_indecies["k"] = k_
+        ds_indices = ds_pts.copy()
+        ds_indices["i"] = i_
+        ds_indices["j"] = j_
+        ds_indices["k"] = k_
 
     xy_periodic = ds_grid.xy_periodic
 
-    ds_position_scalars = grid_indecies_to_position_scalars(
-        i=ds_indecies.i,
-        j=ds_indecies.j,
-        k=ds_indecies.k,
+    ds_position_scalars = grid_indices_to_position_scalars(
+        i=ds_indices.i,
+        j=ds_indices.j,
+        k=ds_indices.k,
         nx=nx,
         ny=ny,
         nz=nz,

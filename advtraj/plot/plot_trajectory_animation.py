@@ -7,6 +7,7 @@ Plot Trajectories
 
 import matplotlib.pyplot as plt
 import numpy as np
+import xarray as xr
 from cohobj.object_tools import box_xyz, get_bounding_boxes
 
 # import matplotlib.colors as mcolors
@@ -136,9 +137,25 @@ def plot_traj_animation(
 
     """
 
-    timestep = ds_traj.attrs["trajectory timestep"]
+    timestep = (
+        ds_traj.time[-1] - ds_traj.time[-2]
+    )  # ds_traj.attrs["trajectory timestep"]
 
     ntimes = ds_traj.time.size
+
+    if "object_label" not in ds_traj.coords:
+
+        obj_lab = xr.DataArray(
+            np.zeros(ds_traj["trajectory_number"].size), dims=["trajectory_number"]
+        )
+        obj_lab["nobjects"] = 1
+        # obj_lab = xr.DataArray(np.arange(ds_traj['trajectory_number'].size),
+        #                                  dims=['trajectory_number'])
+
+        # obj_lab['nobjects'] = obj_lab.size
+
+        ds_traj = ds_traj.assign_coords(object_label=obj_lab)
+
     nobj = ds_traj.object_label.nobjects
 
     plot_class = class_no is not None
@@ -155,10 +172,12 @@ def plot_traj_animation(
             )
             with_boxes = False
 
-    if select is None:
+    if select is None and nobj is not None:
         select = np.arange(0, nobj)
+    else:
+        select = [0]
 
-    var = ["x", "y", "z"]
+    var = ["x", "y", "z", "flag"]
 
     if plot_mask:
         var.append("object_mask")
@@ -227,9 +246,9 @@ def plot_traj_animation(
         zlim = ax.get_zlim()
 
         ds_time = ds.isel(time=itime)
-        ref_time = ds_time.ref_time.item()
+        ref_time = ds_time.ref_time.data  # .item()
 
-        plot_time = ds_time.time.item()
+        plot_time = ds_time.time.data  # .item()
 
         if plot_field:
 
@@ -299,9 +318,11 @@ def plot_traj_animation(
                     )
 
                 nplt += 1
-
+        print(type(plot_time))
+        print(str(plot_time))
         ax.set_title(
             f"{title}\nTime index {itime:03d} Time={plot_time} Ref={ref_time}."
+            # f"{title}\nTime index {itime:03d} Time={plot_time} Ref={ref_time}."
         )
 
         return
@@ -853,8 +874,14 @@ def _update_obj_plot(
 
     x, y, z = _get_xyz(traj, itime, xlim, ylim, Lx, Ly, galilean, timestep)
 
+    good = traj.flag <= 1
+
+    x = x[good]
+    y = y[good]
+    z = z[good]
+
     if plot_mask:
-        mask = traj.object_mask
+        mask = traj.object_mask[good]
     else:
         mask = None
 
@@ -864,6 +891,7 @@ def _update_obj_plot(
 
 
 def _xyz_plot(x, y, z, lines, plot_mask, mask, reset=False):
+
     if reset:
         if plot_mask:
             (line, line_cl) = lines
@@ -887,7 +915,7 @@ def _xyz_plot(x, y, z, lines, plot_mask, mask, reset=False):
         line_cl.set_data(x[in_obj], y[in_obj])
         line_cl.set_3d_properties(z[in_obj])
     else:
-        (line) = lines
+        line = lines[0]
         line.set_data(x, y)
         line.set_3d_properties(z)
     return

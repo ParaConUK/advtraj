@@ -1,6 +1,9 @@
 """
 Main routines for integration
 """
+import numpy as np
+import xarray as xr
+
 from .backward import backward as integrate_backward
 from .forward import forward as integrate_forward
 
@@ -85,6 +88,9 @@ def integrate_trajectories(
     xy_periodic=True,
     interp_order=5,
     forward_solver="fixed_point_iterator",
+    vertical_boundary_option=1,
+    output_path=None,
+    aux_coords=None,
     point_iter_kwargs=None,
     minim_kwargs=None,
 ):
@@ -99,6 +105,13 @@ def integrate_trajectories(
     )
     _validate_position_scalars(ds=ds_position_scalars, xy_periodic=xy_periodic)
     _validate_starting_points(ds=ds_starting_points)
+
+    for c in "xyz":
+        ds_starting_points[f"{c}_err"] = xr.zeros_like(
+            ds_starting_points[c], dtype="float32"
+        )
+
+    ds_starting_points["flag"] = xr.zeros_like(ds_starting_points["x"], dtype=int)
 
     ref_time = ds_starting_points.time
     ds_starting_points = ds_starting_points.assign_coords({"ref_time": ref_time})
@@ -145,6 +158,8 @@ def integrate_trajectories(
         ds_starting_point=ds_starting_points,
         da_times=da_times_backward,
         interp_order=interp_order,
+        output_path=output_path,
+        aux_coords=aux_coords,
     )
 
     ds_traj = integrate_forward(
@@ -153,8 +168,11 @@ def integrate_trajectories(
         da_times=da_times_forward,
         interp_order=interp_order,
         solver=forward_solver,
+        vertical_boundary_option=vertical_boundary_option,
         point_iter_kwargs=point_iter_kwargs,
         minim_kwargs=minim_kwargs,
+        output_path=output_path,
+        aux_coords=aux_coords,
     )
 
     attrs = {
@@ -170,14 +188,23 @@ def integrate_trajectories(
         ds_traj.time.values[-1] - ds_traj.time.values[0]
     ) / (ds_traj.time.size - 1)
 
+    if type(attrs["trajectory timestep"]) is np.timedelta64:
+        attrs["trajectory timestep"] = attrs["trajectory timestep"] / np.timedelta64(
+            1, "s"
+        )
+
     if "fixed_point_iterator" in forward_solver and point_iter_kwargs is not None:
+
         attrs["maxiter"] = point_iter_kwargs["maxiter"]
         attrs["tol"] = point_iter_kwargs["tol"]
+
     elif minim_kwargs is not None:
+
         attrs["maxiter"] = minim_kwargs["minimize_options"]["maxiter"]
         attrs["max_outer_loops"] = minim_kwargs["max_outer_loops"]
 
     if "hybrid_fixed_point_iterator" in forward_solver and minim_kwargs is not None:
+
         attrs["minimize_maxiter"] = minim_kwargs["minimize_options"]["maxiter"]
         attrs["tol"] = minim_kwargs["tol"]
 
