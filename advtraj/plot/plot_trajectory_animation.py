@@ -82,6 +82,7 @@ def plot_traj_animation(
     z_lim=None,
     colors=None,
     ncolmax=6,
+    uniform_aspect=True,
 ):
     """
     Plot animated trajectory points in 3D.
@@ -156,7 +157,11 @@ def plot_traj_animation(
 
         ds_traj = ds_traj.assign_coords(object_label=obj_lab)
 
-    nobj = ds_traj.object_label.nobjects
+        nobj = 1  # ds_traj.object_label.nobjects
+
+    else:
+
+        nobj = len(np.unique(ds_traj.object_label.values))
 
     plot_class = class_no is not None
     plot_field = field_mask is not None
@@ -210,7 +215,9 @@ def plot_traj_animation(
         ds_traj, x_lim=x_lim, y_lim=y_lim, z_lim=z_lim
     )
 
-    fig, ax = init_figure(figsize, view_point, x_lim, y_lim, z_lim)
+    fig, ax = init_figure(
+        figsize, view_point, x_lim, y_lim, z_lim, uniform_aspect=uniform_aspect
+    )
 
     if plot_field:
 
@@ -382,6 +389,7 @@ def plot_family_animation(
     z_lim=None,
     colors=None,
     ncolmax=6,
+    uniform_aspect=True,
 ):
     """
     Plot animated trajectory family points in 3D.
@@ -494,7 +502,9 @@ def plot_family_animation(
         traj_family[0], x_lim=x_lim, y_lim=y_lim, z_lim=z_lim
     )
 
-    fig, ax = init_figure(figsize, view_point, x_lim, y_lim, z_lim)
+    fig, ax = init_figure(
+        figsize, view_point, x_lim, y_lim, z_lim, uniform_aspect=uniform_aspect
+    )
 
     # Create empty line objects for field plot.
 
@@ -635,7 +645,7 @@ def domain_limits(tr, x_lim=None, y_lim=None, z_lim=None):
     return x_lim, y_lim, z_lim, Lx, Ly, Lz
 
 
-def init_figure(figsize, view_point, x_lim, y_lim, z_lim):
+def init_figure(figsize, view_point, x_lim, y_lim, z_lim, uniform_aspect=True):
     fig = plt.figure(figsize=figsize)  # , tight_layout=True)
     ax = fig.add_subplot(111, projection="3d")
 
@@ -651,7 +661,8 @@ def init_figure(figsize, view_point, x_lim, y_lim, z_lim):
     ax.set_zlim(z_lim[0], z_lim[1])
     rz = z_lim[1] - z_lim[0]
 
-    ax.set_box_aspect((rx, ry, rz))
+    if uniform_aspect:
+        ax.set_box_aspect((rx, ry, rz))
 
     ax.set_xlabel("x")
     ax.set_ylabel("y")

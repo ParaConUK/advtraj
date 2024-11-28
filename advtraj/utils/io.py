@@ -1,17 +1,32 @@
 """
 Utilities for trajectory io.
 """
-# import numpy as np
-# import xarray as xr
+import glob
+
+import xarray as xr
 
 
-def ds_save(ds, output_path):  # , out_prec="float32"):
+def ds_save(ds, output_path, fmt: str = "04d"):
 
     file_index = ds.coords["time_index"].item()
-
-    output_file = f"{output_path}_{file_index+1:04d}.nc"
+    output_file = f"{output_path}_{file_index+1:{fmt}}.nc"
 
     d = ds.to_netcdf(output_file, unlimited_dims="time", mode="w", compute=False)
+
     d.compute()
+
+    return ds
+
+
+def gather_traj_files(traj_path: str):
+    files = glob.glob(traj_path)
+    files.sort()
+
+    da_list = []
+    for file in files:
+        da = xr.open_dataset(file)
+        da_list.append(da)
+
+    ds = xr.concat(da_list, dim="time")
 
     return ds

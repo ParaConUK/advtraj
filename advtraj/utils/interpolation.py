@@ -25,7 +25,7 @@ def interpolate_1d_field(da, ds_positions, cyclic, interp_order=1):
         c_max = da[c].values.max()
 
         # c_max = np.array([da[c].max() for c in da.dims])
-        dX = da[c].attrs[f"d{c}"]
+        dX = da[c].values[1] - da[c].values[0]  # da[c].attrs[f"d{c}"]
 
         pad = False
 
@@ -209,7 +209,9 @@ def gen_interpolator_2d_field(da, interp_order=1, cyclic_boundaries=None):
 
     c_min = np.array([da[c].min().values for c in da.dims])
     c_max = np.array([da[c].max().values for c in da.dims])
-    dX = np.array([da[c].attrs[f"d{c}"] for c in da.dims])
+
+    dX = np.array([da[c].values[1] - da[c].values[0] for c in da.dims])
+    # [da[c].attrs[f"d{c}"]
     periodicity = [c in cyclic_boundaries for c in da.dims]
 
     pad = [not p for p in periodicity]
@@ -243,7 +245,8 @@ def gen_interpolator_3d_field(da, interp_order=1, cyclic_boundaries=None):
 
     c_min = np.array([da[c].min().values for c in da.dims])
     c_max = np.array([da[c].max().values for c in da.dims])
-    dX = np.array([da[c].attrs[f"d{c}"] for c in da.dims])
+    dX = np.array([da[c].values[1] - da[c].values[0] for c in da.dims])
+    # dX = np.array([da[c].attrs[f"d{c}"] for c in da.dims])
     periodicity = [c in cyclic_boundaries for c in da.dims]
 
     pad = [not p for p in periodicity]

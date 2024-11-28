@@ -64,18 +64,32 @@ def data_to_traj(
         print(f"Mapping {var_name} onto trajectories.")
 
         da = source_dataset[var_name]
+
+        rename_dict = {}
+        for c in "xyz":
+            nc = [d for d in da.dims if c in d][0]
+            if nc != c:
+                rename_dict[nc] = c
+        if len(nc) > 0:
+            da = da.rename(rename_dict)
+
+        print(da)
+
         varout = []
         for traj_time in ds_traj.time:
 
-            dat = da.sel(time=traj_time)
+            if traj_time.values in da.time.values:
+                dat = da.sel(time=traj_time)
 
-            ds_positions = ds_traj[["x", "y", "z"]].sel(time=traj_time)
+                ds_positions = ds_traj[["x", "y", "z"]].sel(time=traj_time)
 
-            interp_data = interpolate_3d_field(
-                dat, ds_positions, interp_order=interp_order, cyclic_boundaries="xy"
-            )
+                interp_data = interpolate_3d_field(
+                    dat, ds_positions, interp_order=interp_order, cyclic_boundaries="xy"
+                )
 
-            varout.append(interp_data.astype(output_precision))
+                varout.append(interp_data.astype(output_precision))
+            else:
+                print(f"No data for variable {var_name}, time {traj_time}.")
 
         ds_out[var_name] = xr.concat(varout, dim="time")
 
@@ -123,9 +137,14 @@ def aux_coords_to_traj(
     """
 
     for aux_coord in aux_coords:
-        if aux_coord not in source_dataset:
-            continue
-        da_coord = source_dataset.coords[aux_coord]
+        if aux_coord in source_dataset:
+            da_coord = source_dataset.coords[aux_coord]
+        else:
+            cl = [c for c in source_dataset.coords if aux_coord in c]
+            if cl:
+                da_coord = source_dataset.coords[cl[0]]
+            else:
+                continue
         dims_ok = [d in "xyz" for d in da_coord.dims]
         if not all(dims_ok):
             print(

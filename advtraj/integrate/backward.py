@@ -89,7 +89,9 @@ def backward(
         raise ValueError(f"Reference time {ref_time} is not in dataset.")
     ref_index = input_times.index(ref_time)
 
+    # ds_starting_point = ds_starting_point.assign_coords({"time": ref_time})
     ds_starting_point = ds_starting_point.assign_coords(time_index=ref_index)
+
     if "forecast_period" in ds_starting_point.coords:
         ds_starting_point = ds_starting_point.drop_vars(["forecast_period"])
 
@@ -102,8 +104,8 @@ def backward(
         )
 
     if output_path is not None:
-
         ds_starting_point = ds_save(ds_starting_point, output_path)
+
     file_index = ref_index - 1
 
     datasets = [ds_starting_point]

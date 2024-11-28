@@ -191,7 +191,7 @@ def main(
             .drop("time")
         )
 
-        ds_traj = ds_traj.assign_coords({"object_label": olab})
+        ds_traj = ds_traj.assign_coords({"object_label": olab.data})
 
         ds_traj = unsplit_objects(ds_traj, Lx, Ly)
 
