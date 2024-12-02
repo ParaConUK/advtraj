@@ -1,12 +1,44 @@
-"""
-Fixed issues relative to `master` on `dbstein`'s repo:
-
-    - use of `numba.typed.List` to avoid deprecation issues in numba
-    - `f.shape[1]` should be `f.shape[2]` in `_extrapolate1d_z`
-
-"""
 import numba
 import numpy as np
+from numba.typed import List
+
+################################################################################
+# variables to control when we switch between serial / parallel versions
+
+serial_cutoffs = [0, 2000, 400, 100]
+
+
+def set_serial_cutoffs(dimension, cutoff):
+    serial_cutoffs[dimension] = cutoff
+
+
+################################################################################
+# utilities to enable serial / parallel compilation of same function
+
+
+def sjit(func):
+    return numba.njit(func, parallel=False)
+
+
+def pjit(func):
+    return numba.njit(func, parallel=True)
+
+
+################################################################################
+# utility to allow construction of TypedList with Float/Int types (always promoted to float)
+
+
+def FloatList(l):
+    return List([float(lh) for lh in l])
+
+
+def IntList(l):
+    return List([int(lh) for lh in l])
+
+
+def BoolList(l):
+    return List([bool(lh) for lh in l])
+
 
 ################################################################################
 # 1D Extrapolation Routines
@@ -265,6 +297,7 @@ class interp1d(object):
         p:    whether the dimension is taken to be periodic
         c:    whether the array should be padded to allow accurate close eval
         e:    extrapolation distance, how far to allow extrap, in units of h
+                (needs to be an integer)
         if p is True, then f is assumed to given on:
             [a, b)
         if p is False, f is assumed to be given on:
@@ -290,8 +323,8 @@ class interp1d(object):
             right now there is no bounds checking; this will probably segfault
             if you provide values outside of the safe interpolation region...
         """
-        if k not in [1, 3, 5, 7]:
-            raise Exception("k must be 1, 3, 5, or 7")
+        if k not in [1, 3, 5, 7, 9]:
+            raise Exception("k must be 1, 3, 5, 7, or 9")
         self.a = a
         self.b = b
         self.h = h
@@ -309,9 +342,13 @@ class interp1d(object):
         """
         Interpolate to xout
         xout must be a float or a ndarray of floats
+        if xout.size > serial_cutoff, use parallel version
         """
-        func = INTERP_1D[self.k]
         if isinstance(xout, np.ndarray):
+            if xout.size > serial_cutoffs[1]:
+                func = PAR_INTERP_1D[self.k]
+            else:
+                func = SER_INTERP_1D[self.k]
             m = int(np.prod(xout.shape))
             copy_made = False
             if fout is None:
@@ -337,6 +374,7 @@ class interp1d(object):
                 fout[:] = _out
             return _out.reshape(xout.shape)
         else:
+            func = SER_INTERP_1D[self.k]
             _xout = np.array(
                 [xout],
             )
@@ -357,7 +395,6 @@ class interp1d(object):
 
 
 # interpolation routines
-@numba.njit(parallel=True)
 def _interp1d_k1(f, xout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -375,7 +412,6 @@ def _interp1d_k1(f, xout, fout, a, h, n, p, o, lb, ub):
             fout[mi] += f[ixi] * asx[i]
 
 
-@numba.njit(parallel=True)
 def _interp1d_k3(f, xout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -395,7 +431,6 @@ def _interp1d_k3(f, xout, fout, a, h, n, p, o, lb, ub):
             fout[mi] += f[ixi] * asx[i]
 
 
-@numba.njit(parallel=True)
 def _interp1d_k5(f, xout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -459,7 +494,6 @@ def _interp1d_k5(f, xout, fout, a, h, n, p, o, lb, ub):
             fout[mi] += f[ixi] * asx[i]
 
 
-@numba.njit(parallel=True)
 def _interp1d_k7(f, xout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -610,7 +644,6 @@ def _interp1d_k7(f, xout, fout, a, h, n, p, o, lb, ub):
             fout[mi] += f[ixi] * asx[i]
 
 
-@numba.njit(parallel=True)
 def _interp1d_k9(f, xout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -906,20 +939,44 @@ def _interp1d_k9(f, xout, fout, a, h, n, p, o, lb, ub):
             fout[mi] += f[ixi] * asx[i]
 
 
-INTERP_1D = [
+_s_interp1d_k1 = sjit(_interp1d_k1)
+_s_interp1d_k3 = sjit(_interp1d_k3)
+_s_interp1d_k5 = sjit(_interp1d_k5)
+_s_interp1d_k7 = sjit(_interp1d_k7)
+_s_interp1d_k9 = sjit(_interp1d_k9)
+_p_interp1d_k1 = pjit(_interp1d_k1)
+_p_interp1d_k3 = pjit(_interp1d_k3)
+_p_interp1d_k5 = pjit(_interp1d_k5)
+_p_interp1d_k7 = pjit(_interp1d_k7)
+_p_interp1d_k9 = pjit(_interp1d_k9)
+
+SER_INTERP_1D = [
     None,
-    _interp1d_k1,
+    _s_interp1d_k1,
     None,
-    _interp1d_k3,
+    _s_interp1d_k3,
     None,
-    _interp1d_k5,
+    _s_interp1d_k5,
     None,
-    _interp1d_k7,
+    _s_interp1d_k7,
     None,
-    _interp1d_k9,
+    _s_interp1d_k9,
+]
+PAR_INTERP_1D = [
+    None,
+    _p_interp1d_k1,
+    None,
+    _p_interp1d_k3,
+    None,
+    _p_interp1d_k5,
+    None,
+    _p_interp1d_k7,
+    None,
+    _p_interp1d_k9,
 ]
 
 
+# extrapolation routines
 def _extrapolate1d(f, k, p, c, e):
     pad = (not p) and c
     if pad:
@@ -945,7 +1002,11 @@ def _compute_bounds1(a, b, h, p, c, e, k):
         return a + d, b - d
     else:
         d = e * h
-        return a - d, b + d
+        u = b + d
+        u -= (
+            u * 1e-15
+        )  # the routines can fail when we exactly hit the right endpoint, this protects against that
+        return a - d, u
 
 
 ################################################################################
@@ -962,20 +1023,23 @@ class interp2d(object):
         the function behaves as in the 1d case, except that of course padding
         is required if padding is requested in any dimension
         """
-        if k not in [1, 3, 5, 7]:
-            raise Exception("k must be 1, 3, 5, or 7")
-        self.a = a
-        self.b = b
-        self.h = h
+        if k not in [1, 3, 5, 7, 9]:
+            raise Exception("k must be 1, 3, 5, 7, or 9")
+        self.a = FloatList(a)
+        self.b = FloatList(b)
+        self.h = FloatList(h)
         self.f = f
         self.k = k
-        self.p = p
-        self.c = c
-        self.e = e
-        self.n = list(f.shape)
+        self.p = BoolList(p)
+        self.c = BoolList(c)
+        self.e = IntList(e)
+        self.n = IntList(f.shape)
         self.dtype = f.dtype
-        self._f, self._o = _extrapolate2d(f, k, p, c, e)
-        self.lb, self.ub = _compute_bounds(a, b, h, p, c, e, k)
+        self._f, _o = _extrapolate2d(f, k, p, c, e)
+        self._o = IntList(_o)
+        lb, ub = _compute_bounds(a, b, h, p, c, e, k)
+        self.lb = FloatList(lb)
+        self.ub = FloatList(ub)
 
     def __call__(self, xout, yout, fout=None):
         """
@@ -983,8 +1047,11 @@ class interp2d(object):
         For 1-D interpolation, xout must be a float
             or a ndarray of floats
         """
-        func = INTERP_2D[self.k]
         if isinstance(xout, np.ndarray):
+            if xout.size > serial_cutoffs[2]:
+                func = PAR_INTERP_2D[self.k]
+            else:
+                func = SER_INTERP_2D[self.k]
             m = int(np.prod(xout.shape))
             copy_made = False
             if fout is None:
@@ -1012,6 +1079,7 @@ class interp2d(object):
                 fout[:] = _out
             return _out.reshape(xout.shape)
         else:
+            func = SER_INTERP_2D[self.k]
             _xout = np.array(
                 [xout],
             )
@@ -1036,7 +1104,6 @@ class interp2d(object):
 
 
 # interpolation routines
-@numba.njit(parallel=True)
 def _interp2d_k1(f, xout, yout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -1064,7 +1131,6 @@ def _interp2d_k1(f, xout, yout, fout, a, h, n, p, o, lb, ub):
                 fout[mi] += f[ixi, iyj] * asx[i] * asy[j]
 
 
-@numba.njit(parallel=True)
 def _interp2d_k3(f, xout, yout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -1096,7 +1162,6 @@ def _interp2d_k3(f, xout, yout, fout, a, h, n, p, o, lb, ub):
                 fout[mi] += f[ixi, iyj] * asx[i] * asy[j]
 
 
-@numba.njit(parallel=True)
 def _interp2d_k5(f, xout, yout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -1216,7 +1281,6 @@ def _interp2d_k5(f, xout, yout, fout, a, h, n, p, o, lb, ub):
                 fout[mi] += f[ixi, iyj] * asx[i] * asy[j]
 
 
-@numba.njit(parallel=True)
 def _interp2d_k7(f, xout, yout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -1510,7 +1574,6 @@ def _interp2d_k7(f, xout, yout, fout, a, h, n, p, o, lb, ub):
                 fout[mi] += f[ixi, iyj] * asx[i] * asy[j]
 
 
-@numba.njit(parallel=True)
 def _interp2d_k9(f, xout, yout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -2094,20 +2157,44 @@ def _interp2d_k9(f, xout, yout, fout, a, h, n, p, o, lb, ub):
                 fout[mi] += f[ixi, iyj] * asx[i] * asy[j]
 
 
-INTERP_2D = [
+_s_interp2d_k1 = sjit(_interp2d_k1)
+_s_interp2d_k3 = sjit(_interp2d_k3)
+_s_interp2d_k5 = sjit(_interp2d_k5)
+_s_interp2d_k7 = sjit(_interp2d_k7)
+_s_interp2d_k9 = sjit(_interp2d_k9)
+_p_interp2d_k1 = pjit(_interp2d_k1)
+_p_interp2d_k3 = pjit(_interp2d_k3)
+_p_interp2d_k5 = pjit(_interp2d_k5)
+_p_interp2d_k7 = pjit(_interp2d_k7)
+_p_interp2d_k9 = pjit(_interp2d_k9)
+
+SER_INTERP_2D = [
     None,
-    _interp2d_k1,
+    _s_interp2d_k1,
     None,
-    _interp2d_k3,
+    _s_interp2d_k3,
     None,
-    _interp2d_k5,
+    _s_interp2d_k5,
     None,
-    _interp2d_k7,
+    _s_interp2d_k7,
     None,
-    _interp2d_k9,
+    _s_interp2d_k9,
+]
+PAR_INTERP_2D = [
+    None,
+    _p_interp2d_k1,
+    None,
+    _p_interp2d_k3,
+    None,
+    _p_interp2d_k5,
+    None,
+    _p_interp2d_k7,
+    None,
+    _p_interp2d_k9,
 ]
 
 
+# extrapolation routines
 def _extrapolate2d(f, k, p, c, e):
     padx = (not p[0]) and c[0]
     pady = (not p[1]) and c[1]
@@ -2164,20 +2251,23 @@ class interp3d(object):
         the function behaves as in the 1d case, except that of course padding
         is required if padding is requested in any dimension
         """
-        if k not in [1, 3, 5, 7]:
-            raise Exception("k must be 1, 3, 5, or 7")
-        self.a = a
-        self.b = b
-        self.h = h
+        if k not in [1, 3, 5, 7, 9]:
+            raise Exception("k must be 1, 3, 5, 7, or 9")
+        self.a = FloatList(a)
+        self.b = FloatList(b)
+        self.h = FloatList(h)
         self.f = f
         self.k = k
-        self.p = p
-        self.c = c
-        self.e = e
-        self.n = list(f.shape)
+        self.p = BoolList(p)
+        self.c = BoolList(c)
+        self.e = IntList(e)
+        self.n = IntList(f.shape)
         self.dtype = f.dtype
-        self._f, self._o = _extrapolate3d(f, k, p, c, e)
-        self.lb, self.ub = _compute_bounds(a, b, h, p, c, e, k)
+        self._f, _o = _extrapolate3d(f, k, p, c, e)
+        self._o = IntList(_o)
+        lb, ub = _compute_bounds(a, b, h, p, c, e, k)
+        self.lb = FloatList(lb)
+        self.ub = FloatList(ub)
 
     def __call__(self, xout, yout, zout, fout=None):
         """
@@ -2185,8 +2275,11 @@ class interp3d(object):
         For 1-D interpolation, xout must be a float
             or a ndarray of floats
         """
-        func = INTERP_3D[self.k]
         if isinstance(xout, np.ndarray):
+            if xout.size > serial_cutoffs[3]:
+                func = PAR_INTERP_3D[self.k]
+            else:
+                func = SER_INTERP_3D[self.k]
             m = int(np.prod(xout.shape))
             copy_made = False
             if fout is None:
@@ -2204,18 +2297,19 @@ class interp3d(object):
                 _yout,
                 _zout,
                 _out,
-                numba.typed.List(self.a),
-                numba.typed.List(self.h),
-                numba.typed.List(self.n),
-                numba.typed.List(self.p),
-                numba.typed.List(self._o),
-                numba.typed.List(self.lb),
-                numba.typed.List(self.ub),
+                self.a,
+                self.h,
+                self.n,
+                self.p,
+                self._o,
+                self.lb,
+                self.ub,
             )
             if copy_made:
                 fout[:] = _out
             return _out.reshape(xout.shape)
         else:
+            func = SER_INTERP_3D[self.k]
             _xout = np.array(
                 [xout],
             )
@@ -2232,19 +2326,18 @@ class interp3d(object):
                 _yout,
                 _zout,
                 _out,
-                numba.typed.List(self.a),
-                numba.typed.List(self.h),
-                numba.typed.List(self.n),
-                numba.typed.List(self.p),
-                numba.typed.List(self._o),
-                numba.typed.List(self.lb),
-                numba.typed.List(self.ub),
+                self.a,
+                self.h,
+                self.n,
+                self.p,
+                self._o,
+                self.lb,
+                self.ub,
             )
             return _out[0]
 
 
 # interpolation routines
-@numba.njit(parallel=True)
 def _interp3d_k1(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -2282,7 +2375,6 @@ def _interp3d_k1(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
                     fout[mi] += f[ixi, iyj, izk] * asx[i] * asy[j] * asz[k]
 
 
-@numba.njit(parallel=True)
 def _interp3d_k3(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -2326,7 +2418,6 @@ def _interp3d_k3(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
                     fout[mi] += f[ixi, iyj, izk] * asx[i] * asy[j] * asz[k]
 
 
-@numba.njit(parallel=True)
 def _interp3d_k5(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -2502,7 +2593,6 @@ def _interp3d_k5(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
                     fout[mi] += f[ixi, iyj, izk] * asx[i] * asy[j] * asz[k]
 
 
-@numba.njit(parallel=True)
 def _interp3d_k7(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -2939,7 +3029,6 @@ def _interp3d_k7(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
                     fout[mi] += f[ixi, iyj, izk] * asx[i] * asy[j] * asz[k]
 
 
-@numba.njit(parallel=True)
 def _interp3d_k9(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
     m = fout.shape[0]
     for mi in numba.prange(m):
@@ -3811,20 +3900,44 @@ def _interp3d_k9(f, xout, yout, zout, fout, a, h, n, p, o, lb, ub):
                     fout[mi] += f[ixi, iyj, izk] * asx[i] * asy[j] * asz[k]
 
 
-INTERP_3D = [
+_s_interp3d_k1 = sjit(_interp3d_k1)
+_s_interp3d_k3 = sjit(_interp3d_k3)
+_s_interp3d_k5 = sjit(_interp3d_k5)
+_s_interp3d_k7 = sjit(_interp3d_k7)
+_s_interp3d_k9 = sjit(_interp3d_k9)
+_p_interp3d_k1 = pjit(_interp3d_k1)
+_p_interp3d_k3 = pjit(_interp3d_k3)
+_p_interp3d_k5 = pjit(_interp3d_k5)
+_p_interp3d_k7 = pjit(_interp3d_k7)
+_p_interp3d_k9 = pjit(_interp3d_k9)
+
+SER_INTERP_3D = [
     None,
-    _interp3d_k1,
+    _s_interp3d_k1,
     None,
-    _interp3d_k3,
+    _s_interp3d_k3,
     None,
-    _interp3d_k5,
+    _s_interp3d_k5,
     None,
-    _interp3d_k7,
+    _s_interp3d_k7,
     None,
-    _interp3d_k9,
+    _s_interp3d_k9,
+]
+PAR_INTERP_3D = [
+    None,
+    _p_interp3d_k1,
+    None,
+    _p_interp3d_k3,
+    None,
+    _p_interp3d_k5,
+    None,
+    _p_interp3d_k7,
+    None,
+    _p_interp3d_k9,
 ]
 
 
+# extrapolation routines
 def _extrapolate3d(f, k, p, c, e):
     padx = (not p[0]) and c[0]
     pady = (not p[1]) and c[1]

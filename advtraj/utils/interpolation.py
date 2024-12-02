@@ -3,9 +3,10 @@ Routines for interpolating 3D scalar fields to arbitrary positions in domains
 with (optional) cyclic boundary conditions
 """
 
-import fast_interp
 import numpy as np
 import xarray as xr
+
+import advtraj.lib.fast_interp as fast_interp
 
 
 def interpolate_1d_field(da, ds_positions, cyclic, interp_order=1):
