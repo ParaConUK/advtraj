@@ -434,7 +434,7 @@ def _backtrack_origin_point_iterate(
         # Convert to Dataset
         ds_traj_posn_next = _pt_arr_to_ds(pt_traj_posn_next)
         # Calculate final error.
-        dist, ndist, err = get_error_norm(
+        dist, in_domain, ndist, err = get_error_norm(
             ds_position_scalars,
             ds_traj_posn_org,
             ds_traj_posn_next,
@@ -631,7 +631,12 @@ def _ds_backtrack_origin_optimize(
         interpolator=interpolator,
         interp_order=interp_order,
     )
-    return ds_traj_posn_next, dist, in_domain
+    not_conv_mask = np.zeros(ds_traj_posn_org.sizes["trajectory_number"], dtype=bool)
+
+    # ncm = np.abs(ndist) > tol
+    # not_conv_mask = ncm[0, :] | ncm[1, :] | ncm[2, :]
+
+    return ds_traj_posn_next, dist, in_domain, not_conv_mask
 
 
 def _extrapolate_single_timestep(
@@ -750,7 +755,12 @@ def _extrapolate_single_timestep(
 
     else:
 
-        ds_traj_posn_next, dist, in_domain = _ds_backtrack_origin_optimize(
+        (
+            ds_traj_posn_next,
+            dist,
+            in_domain,
+            not_conv_mask,
+        ) = _ds_backtrack_origin_optimize(
             ds_position_scalars_next,
             ds_traj_posn_origin,
             ds_traj_posn_next_est,

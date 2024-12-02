@@ -76,7 +76,7 @@ def backward(
     da_times,
     interp_order=5,
     output_path=None,
-    aux_coords: list[str] = None,
+    aux_coords: list = None,
 ):
     """
     Using the position scalars `ds_position_scalars` integrate backwards from

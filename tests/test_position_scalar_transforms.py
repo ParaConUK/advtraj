@@ -37,19 +37,19 @@ def test_position_scalar_transforms_are_symmetric():
         ds_position_scalars_pts = advtraj_gm_utils.grid_locations_to_position_scalars(
             ds_grid=ds_grid, ds_pts=ds_pts
         )
-        ds_grid_idxs_pts = advtraj_gm_utils.estimate_initial_grid_indecies(
+        ds_grid_idxs_pts = advtraj_gm_utils.estimate_initial_grid_indices(
             ds_position_scalars=ds_position_scalars_pts, N_grid=dict(x=nx, y=ny)
         )
-        ds_pts_est = advtraj_gm_utils.estimate_3d_position_from_grid_indecies(
+        ds_pts_est = advtraj_gm_utils.estimate_3d_position_from_grid_indices(
             ds_grid=ds_grid,
             i=ds_grid_idxs_pts.i,
             j=ds_grid_idxs_pts.j,
             k=ds_grid_idxs_pts.k,
         )
 
-        np.testing.assert_allclose(ds_pts.x, ds_pts_est.x_est)
-        np.testing.assert_allclose(ds_pts.y, ds_pts_est.y_est)
-        np.testing.assert_allclose(ds_pts.z, ds_pts_est.z_est)
+        np.testing.assert_allclose(ds_pts.x, ds_pts_est.x)
+        np.testing.assert_allclose(ds_pts.y, ds_pts_est.y)
+        np.testing.assert_allclose(ds_pts.z, ds_pts_est.z)
 
 
 def test_position_scalars_translation():
@@ -64,18 +64,18 @@ def test_position_scalars_translation():
     ds = init_position_scalars(ds=ds_grid)
 
     for i_shift in [0, 2, int(Lx / dx)]:
-        ds_shifted = ds.roll(x=i_shift, roll_coords=False)
+        ds_shifted = ds.copy().roll(x=i_shift, roll_coords=False)
 
-        ds_grid_idxs = advtraj_gm_utils.estimate_initial_grid_indecies(
+        ds_grid_idxs = advtraj_gm_utils.estimate_initial_grid_indices(
             ds_position_scalars=ds_shifted, N_grid=dict(x=nx, y=ny)
         )
 
         ds_grid_idxs_ = ds_grid_idxs.isel(y=0, z=0)
 
-        ds_traj_posn_new = advtraj_gm_utils.estimate_3d_position_from_grid_indecies(
+        ds_traj_posn_new = advtraj_gm_utils.estimate_3d_position_from_grid_indices(
             ds_grid=ds_shifted, i=ds_grid_idxs_.i, j=ds_grid_idxs_.j, k=ds_grid_idxs_.k
         )
 
-        x_ref = ds_shifted.x
-        x_est = ds_traj_posn_new.roll(x=-i_shift, roll_coords=False).x_est
+        x_ref = ds_shifted.x.values
+        x_est = ds_traj_posn_new.x.roll(x=-i_shift, roll_coords=False).values
         assert np.allclose(x_ref, x_est)
