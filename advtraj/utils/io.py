@@ -11,7 +11,7 @@ def ds_save(ds, output_path, fmt: str = None) -> xr.Dataset:
         fmt = "04d"
     file_index = ds.coords["time_index"].item()
     ref_index = ds.coords["ref_time_index"].item()
-    output_file = f"{output_path}_{ref_index+1:{fmt}}_{file_index+1:{fmt}}.nc"
+    output_file = f"{output_path}_{ref_index + 1:{fmt}}_{file_index + 1:{fmt}}.nc"
 
     d = ds.to_netcdf(output_file, unlimited_dims="time", mode="w", compute=False)
 
