@@ -2,6 +2,8 @@
 Calculations for forward trajectory from a point in space and time using the
 position scalars.
 """
+import math
+
 import numpy as np
 import numpy.random as rnd
 import scipy.optimize
@@ -857,6 +859,8 @@ def forward(
     See _backtrack_origin_point_iterate for available options.
 
     """
+    input_times = list(ds_position_scalars["time"].values)
+
     if ds_back_trajectory.time.count() < 2:
         raise Exception(
             "The back trajectory must contain at least two points for the forward"
@@ -902,7 +906,8 @@ def forward(
         )
 
         if output_path is not None:
-            ds_traj_posn_est = ds_save(ds_traj_posn_est, output_path)
+            out_fmt = f"0{math.ceil(math.log10(len(input_times)))}"
+            ds_traj_posn_est = ds_save(ds_traj_posn_est, output_path, fmt=out_fmt)
 
         ds_traj = xr.concat([ds_traj, ds_traj_posn_est], dim="time")
 

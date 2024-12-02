@@ -2,6 +2,8 @@
 Functionality for computing trajectories backward from a set of starting points
 at a single point in time using the position scalars.
 """
+import math
+
 import xarray as xr
 from tqdm import tqdm
 
@@ -91,6 +93,7 @@ def backward(
 
     # ds_starting_point = ds_starting_point.assign_coords({"time": ref_time})
     ds_starting_point = ds_starting_point.assign_coords(time_index=ref_index)
+    ds_starting_point = ds_starting_point.assign_coords(ref_time_index=ref_index)
 
     if "forecast_period" in ds_starting_point.coords:
         ds_starting_point = ds_starting_point.drop_vars(["forecast_period"])
@@ -104,7 +107,8 @@ def backward(
         )
 
     if output_path is not None:
-        ds_starting_point = ds_save(ds_starting_point, output_path)
+        out_fmt = f"0{math.ceil(math.log10(len(input_times)))}"
+        ds_starting_point = ds_save(ds_starting_point, output_path, fmt=out_fmt)
 
     file_index = ref_index - 1
 
@@ -184,7 +188,7 @@ def backward(
             )
 
         if output_path is not None:
-            ds_traj_posn_prev = ds_save(ds_traj_posn_prev, output_path)
+            ds_traj_posn_prev = ds_save(ds_traj_posn_prev, output_path, fmt=out_fmt)
         file_index -= 1
 
         datasets.append(ds_traj_posn_prev)
