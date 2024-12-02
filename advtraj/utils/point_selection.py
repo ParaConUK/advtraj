@@ -29,8 +29,24 @@ def mask_to_positions(mask: xr.DataArray) -> xr.Dataset:
         .stack(pos_number=("x", "y", "z"))
         .dropna(dim="pos_number")
     )
-    # now we'll turn this 1D dataset where (x, y, z) are coordinates into
-    # one where they are variables instead
+
+    # print(f'{poi=}')
+    # # now we'll turn this 1D dataset where (x, y, z) are coordinates into
+    # # one where they are variables instead
+
+    # p1 = poi.reset_index("pos_number")
+    # print(f'{p1=}')
+
+    # p2 = p1.assign_coords(pos_number=np.arange(poi.pos_number.size))
+    # print(f'{p2=}')
+
+    # p3 = p2.reset_coords(["x", "y", "z"])
+    # print(f'{p3=}')
+
+    # positions = p3[["x", "y", "z"]]
+
+    # print(positions)
+
     positions = (
         poi.reset_index("pos_number")
         .assign_coords(pos_number=np.arange(poi.pos_number.size))

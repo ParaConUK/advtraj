@@ -191,7 +191,7 @@ def main(
             .drop("time")
         )
 
-        ds_traj = ds_traj.assign_coords({"object_label": olab})
+        ds_traj = ds_traj.assign_coords({"object_label": olab.data})
 
         ds_traj = unsplit_objects(ds_traj, Lx, Ly)
 
@@ -199,6 +199,8 @@ def main(
     print(f"Trajectories saved to {output_path}")
 
     print(ds_traj)
+
+    ds_traj.close()
 
 
 if __name__ == "__main__":
@@ -214,7 +216,8 @@ if __name__ == "__main__":
 
     exptlist = ["std"]
 
-    root_path = "C:/Users/paclk/OneDrive - University of Reading/ug_project_data/Data/"
+    # root_path = "C:/Users/paclk/OneDrive - University of Reading/ug_project_data/Data/"
+    root_path = "F:/Data/ug_project_data/"
 
     data_path = root_path + ""
     odir = root_path + "trajectories/"

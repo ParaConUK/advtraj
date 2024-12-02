@@ -6,10 +6,8 @@ Plot trajectory animations.
 from pathlib import Path
 
 import xarray as xr
-from cloud_classify import cloud_bl_classify
 from load_data import load_data
 
-from advtraj.classify.traj_classify import set_traj_class
 from advtraj.plot.plot_trajectory_animation import plot_traj_animation
 
 case = "cloud"
@@ -86,47 +84,17 @@ ds_traj = xr.open_dataset(output_path)
 print(ds_traj.ref_time)
 # print(ds_traj)
 
-ds_traj_data = xr.open_dataset(output_path_data)
-
-# print(ds_traj_data)
-
-if case == "w":
-
-    w_max = ds_traj_data.w.sel(time=ds_traj.ref_time).max()
-
-    mask = ds_traj_data.w > 0.9 * w_max
-    mask.name = "obj_mask"
-
-elif case == "cloud":
-
-    # we'll use as starting points for the trajectories all points where
-    # the cloud liquid water mass is > 1E-5.
-    thresh = 1e-5
-
-    mask = ds_traj_data.q_cloud_liquid_mass > thresh
-    mask.name = "obj_mask"
-
-ds_traj = xr.merge((ds_traj, mask))
-
-ds_all = xr.merge((ds_traj, ds_traj_data))
-
-# print(ds_traj)
-
-traj_class_cloud = set_traj_class(mask)
-
-traj_class_cloud_bl = cloud_bl_classify(ds_all)
-
-colors = ["red", "green", "blue", "cyan", "purple", "yellow", "brown", "orange", "pink"]
 
 anim = plot_traj_animation(
     ds_traj,
     # plot_mask=True,
     # class_no = traj_class_cloud,
-    class_no=traj_class_cloud_bl,
-    select=[9],
+    # class_no=traj_class_cloud_bl,
+    # select=[9],
     # select=[9, 20, 23],
     # field_mask = mask_field,
     galilean=(-8, -1.5),
+    plot_mask=False,
     # view_point=(30,30),
     anim_name="Traj_plot_cloud_class.gif",
     load_ds=True,
@@ -134,8 +102,8 @@ anim = plot_traj_animation(
     legend=True,
     # with_boxes=True,
     # field_size = 4.0,
-    x_lim=[4400, 6400],
-    y_lim=[3000, 5000],
+    # x_lim=[4400, 6400],
+    # y_lim=[3000, 5000],
     title="Selected objects",
     # colors=colors,
 )

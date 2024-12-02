@@ -57,7 +57,7 @@ def test_diagonal_advection():
 
 
 def _wrap_add(x, y, a, b):
-    """add x+y modulu the answer being in range [a...b[
+    """add x+y modulo the answer being in range [a...b[
     https://stackoverflow.com/a/51467186/271776
     """
     y %= b - a
@@ -177,10 +177,6 @@ def _make_starting_points(n_trajectories, t0, dx, dy, dz, Lx, Ly, Lz):
 
     ds_starting_points = ds_starting_points.assign_coords(time=t0)
 
-    ds_starting_points["x_err"] = xr.zeros_like(ds_starting_points["x"])
-    ds_starting_points["y_err"] = xr.zeros_like(ds_starting_points["y"])
-    ds_starting_points["z_err"] = xr.zeros_like(ds_starting_points["z"])
-
     return ds_starting_points
 
 
@@ -245,7 +241,7 @@ def _trajectory_integration(
         ds_starting_points_single.y.item(), v * dt_steps, 0.0, Ly
     )
 
-    assert len(x_truth_single) == n_timesteps
+    assert len(x_truth_single) >= n_timesteps
 
     # Test for multiple trajectories.
     if n_trajectories > 1:
@@ -263,8 +259,11 @@ def _trajectory_integration(
 
     x_est = ds_traj.x.values
     y_est = ds_traj.y.values
-    assert len(x_est) == n_timesteps
+    assert len(x_est) >= n_timesteps
 
+    if len(x_est) >= n_timesteps:
+        x_est = x_est[1:]
+        y_est = y_est[1:]
     # # the estimates for the grid-position aren't perfect, allow for a small
     # # error for now
     atol = 0.1

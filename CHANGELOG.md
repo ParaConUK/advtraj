@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/ParaConUK/advtraj/tree/HEAD)
 
-[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.2...HEAD)
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.3...HEAD)
+
+## [v0.5.3](https://github.com/ParaConUK/advtraj/tree/v0.5.3)
+
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.2...v0.5.3)
+
+*new features*
+
+- Added support for UM LAM with 3 trajectory tracers.
 
 ## [v0.5.2](https://github.com/ParaConUK/advtraj/tree/v0.5.2)
 

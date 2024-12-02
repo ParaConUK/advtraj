@@ -140,8 +140,10 @@ def init_position_scalars(ds):
 
     ds = xr.merge([ds, ds_position_scalars])
     # Add residual errors.
-    ds["x_err"] = xr.zeros_like(ds["x"])
-    ds["y_err"] = xr.zeros_like(ds["y"])
-    ds["z_err"] = xr.zeros_like(ds["z"])
+    #   ds["x_err"] = xr.zeros_like(ds["x"])
+    #   ds["y_err"] = xr.zeros_like(ds["y"])
+    #   ds["z_err"] = xr.zeros_like(ds["z"])
+
+    ds.attrs["xy_periodic"] = True
 
     return ds

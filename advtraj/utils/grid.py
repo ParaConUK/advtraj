@@ -105,3 +105,50 @@ def wrap_periodic_grid_coords(
         else:
             ds_posn_copy = ds_posn_copy.update({c: wrapped_x})
     return ds_posn_copy
+
+
+def create_index_dims(ds, offsets: dict, dimlist: dict = None):
+    """
+    Construct x,y,z as 'grid' indices
+    and make them the primary dimensions.
+
+    Parameters
+    ----------
+    ds : xarray Dataset or DataArray
+    offsets : dict
+        Index offsets for x,y,z ( so first point of x is offsets['x'])
+    dimlist : dict, optional
+        Identifiers for dimensions corresponding to x,y,z. The default is None.
+        If None,
+        dimlist = {'x':'longitude',
+                   'y':'latitude',
+                   'z':'level_number'}
+
+    Returns
+    -------
+    ds : xarray Dataset or DataArray
+        Copy of input with new primary dimensions.
+
+    """
+
+    if dimlist is None:
+        dimlist = {"x": "longitude", "y": "latitude", "z": "level_number"}
+
+    swap_map = {}
+    for outdim, indim in dimlist.items():
+        for dim in ds.dims:
+            if indim not in dim:
+                continue
+            coord_vals = np.arange(ds.sizes[dim], dtype="float32") + offsets[outdim]
+            ds = ds.assign_coords({outdim: (dim, coord_vals)})
+            swap_map[dim] = outdim
+
+    ds = ds.swap_dims(swap_map)
+
+    # Add in grid spacing and domain size for each dimension.
+
+    for c in "xyz":
+        ds[c].attrs[f"d{c}"] = 1.0
+        ds[c].attrs[f"L{c}"] = np.float32(ds.dims[c] - 1)
+
+    return ds
