@@ -10,7 +10,7 @@
 
 *new features*
 
-- Added suoort for UM LAM with 3 trajectory tracers.
+- Added support for UM LAM with 3 trajectory tracers.
 
 ## [v0.5.2](https://github.com/ParaConUK/advtraj/tree/v0.5.2)
 
