@@ -13,8 +13,16 @@ from advtraj.utils.grid import find_coord_grid_spacing
 
 def load_data(files, ref_dataset=None, traj=True, fields_to_keep=None):
 
+    dsod = xr.open_dataset(files[0])
+
     if fields_to_keep is None:
-        fields_to_keep = []
+        keep_fields = []
+    elif type(fields_to_keep) is str and fields_to_keep.lower() == "all":
+        keep_fields = list(dsod.data_vars.keys())
+    elif type(fields_to_keep) is list:
+        keep_fields = fields_to_keep
+
+    print(keep_fields)
 
     tracer_fields = [
         "tracer_traj_xr",
@@ -24,10 +32,12 @@ def load_data(files, ref_dataset=None, traj=True, fields_to_keep=None):
         "tracer_traj_zr",
     ]
 
-    data_fields = fields_to_keep
+    data_fields = keep_fields
 
     if traj:
-        data_fields += tracer_fields
+        for field in tracer_fields:
+            if field not in data_fields:
+                data_fields.append(field)
 
     def preprocess(ds):
         if "options_database" in list(ds.data_vars):

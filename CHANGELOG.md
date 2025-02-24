@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/ParaConUK/advtraj/tree/HEAD)
 
-[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.3...HEAD)
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.4...HEAD)
+
+## [v0.5.4](https://github.com/ParaConUK/advtraj/tree/v0.5.4)
+
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.3...v0.5.4)
+
+*new features*
+
+- Primarily fixing behaviour of optimiser in `hybrid_fixed_point_iterator` solver.
 
 ## [v0.5.3](https://github.com/ParaConUK/advtraj/tree/v0.5.3)
 

@@ -238,7 +238,6 @@ def _backtrack_origin_point_iterate(
     opt_one_step=False,
     norm="max_abs_error",
     max_outer_loops=1,
-    minimizer="BFGS",
     minim_kwargs=None,
 ):
     """
@@ -272,7 +271,7 @@ def _backtrack_origin_point_iterate(
         Pre-calculated interpolator for fields in ds_position_scalars.
         If None, interpolator is calculated on each call to the interpolation.
     solver : str
-        "hybrid_fixed_point_iterator" or "hybrid_fixed_point_iterator".
+        "fixed_point_iterator" or "hybrid_fixed_point_iterator".
     interp_order : int, optional
         Interpolation order. The default is 5.
 
@@ -292,7 +291,6 @@ def _backtrack_origin_point_iterate(
                            'mean_abs_error', 'max_abs_error'
                            or RMS distance. Default='max_abs_error'
     max_outer_loops (int): Maximum number of outer loops of minimizer.
-    minimizer       (str): Minimizaer to use. Default="BFGS"
     minim_kwargs (dict)  : Options for minimiser.
 
     Returns
@@ -403,24 +401,23 @@ def _backtrack_origin_point_iterate(
                 ds_traj_posn_org_subset,
                 pt_traj_posn_next_not_conv,
                 interpolator,
-                minimizer,
                 interp_order=interp_order,
                 **minim_kwargs,
             )
         else:
             for itraj in range(pt_traj_posn_next_not_conv.shape[1]):
 
-                print(f"Optimising unconverged trajectory {itraj}.")
+                tr_num = ds_traj_posn_org_subset.trajectory_number.values[itraj]
+                print(f"Optimising unconverged trajectory {itraj}: {tr_num}.")
                 pt_traj_posn = pt_traj_posn_next_not_conv[:, itraj].flatten()
-                ds_traj_posn_orig = ds_traj_posn_org_subset.isel(
-                    trajectory_number=itraj
+                ds_traj_posn_orig = ds_traj_posn_org_subset.sel(
+                    trajectory_number=tr_num
                 )
                 pt_traj_posn = _pt_backtrack_origin_optimize(
                     ds_position_scalars,
                     ds_traj_posn_orig,
                     pt_traj_posn,
                     interpolator,
-                    minimizer,
                     interp_order=interp_order,
                     **minim_kwargs,
                 )
@@ -461,8 +458,8 @@ def _pt_backtrack_origin_optimize(
     ds_traj_posn_org,
     pt_traj_posn_first_guess,
     interpolator,
-    minimization_method,
     interp_order=5,
+    minimizer="BFGS",
     max_outer_loops=1,
     tol=0.01,
     minimize_options=None,
@@ -490,7 +487,7 @@ def _pt_backtrack_origin_optimize(
     interpolator : fast interp interpolator.
         Pre-calculated interpolator for fields in ds_position_scalars.
         If None, interpolator is calculated on each call to the interpolation.
-    minimization_method : str
+    minimizer : str, optional
         Methods supported by  scipy.optimize.minimize.
     interp_order : int, optional
         Interpolation order. The default is 5.
@@ -517,13 +514,13 @@ def _pt_backtrack_origin_optimize(
 
     grid_spacing = np.array(
         [
-            ds_position_scalars["x"].attrs["dx"],
-            ds_position_scalars["y"].attrs["dy"],
-            ds_position_scalars["z"].attrs["dz"],
+            [ds_position_scalars["x"].attrs["dx"]],
+            [ds_position_scalars["y"].attrs["dy"]],
+            [ds_position_scalars["z"].attrs["dz"]],
         ]
     )
 
-    grid_size = np.sqrt(np.mean(grid_spacing * grid_spacing))
+    #    grid_size = np.sqrt(np.mean(grid_spacing * grid_spacing))
 
     def _calc_backtrack_origin_err(pt_traj_posn):
 
@@ -537,7 +534,9 @@ def _pt_backtrack_origin_optimize(
             interp_order=interp_order,
         )
 
-        err = np.linalg.norm(dist_arr.flatten(), ord=2)
+        ndist = dist_arr / grid_spacing
+        # err = np.linalg.norm(dist_arr.flatten(), ord=2)
+        err = np.linalg.norm(ndist.flatten(), ord=2)
         return err
 
     # for the minimization we will be using just a numpy-array
@@ -549,11 +548,12 @@ def _pt_backtrack_origin_optimize(
         sol = scipy.optimize.minimize(
             fun=_calc_backtrack_origin_err,
             x0=pt_traj_posn_next,
-            method=minimization_method,
+            method=minimizer,
             options=options,
         )
         pt_traj_posn_next = sol.x
-        if sol.fun / np.sqrt(sol.x.size) <= grid_size * tol:
+        print(f"{niter=} {sol.fun=}")
+        if sol.fun / np.sqrt(sol.x.size) <= tol:  # grid_size * tol:
             break
         niter += 1
 
@@ -779,7 +779,7 @@ def _extrapolate_single_timestep(
     # Copy in final error measure for each trajectory.
     for i, c in enumerate("xyz"):
         derr = xr.DataArray(
-            dist[i, :].astype("float32"),
+            dist[i, :].astype(np.float32),
             coords={
                 "trajectory_number": ds_traj_posn_next.coords[
                     "trajectory_number"

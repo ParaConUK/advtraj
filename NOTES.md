@@ -330,7 +330,7 @@ Note that, towards the end, object (24060, 22) is a small cloud fragment that fo
 If we are not interested in the remote interactions at all, further simplification can be achieved by just considering adjacent times in the reference times compared i.e. for one reference time T we just compare with reference times T-1 and T+1.
 This is what would be done for normal object tracking - we generally only need to compare adjacent time steps.
 This method should cover object merging and splitting, though a criterion would be needed to decide on how or even whether to identify the 'super objects' involved.
-In out example, the computation time is nearly halved, to 20 minutes.
+In our example, the computation time is nearly halved, to 20 minutes.
 ![Full graph for sampled data, ref and adjacent only](figures/diagnostics_3d_ts_trajectories_cloud_5_fixed_point_iterator_std_objects_sample_ref_adj_all.png)
 ![Object (23400, 7) in sampled data, ref and adjacent only](figures/diagnostics_3d_ts_trajectories_cloud_5_fixed_point_iterator_std_objects_sample_ref_adj.png)
 

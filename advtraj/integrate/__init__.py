@@ -98,7 +98,7 @@ def _set_coord_attrs(ds, xy_periodic):
     return ds
 
 
-def _set_data_precision(ds, precision="float32"):
+def _set_data_precision(ds, precision=np.float32):
     for var in ds.data_vars:
         da = ds[var]
         ds[var] = da.astype(precision)
@@ -136,10 +136,10 @@ def integrate_trajectories(
 
     for c in POSITION_VAR_NAMES:
         ds_starting_points[f"{c}_err"] = xr.zeros_like(
-            ds_starting_points[c], dtype="float32"
+            ds_starting_points[c], dtype=np.float32
         )
 
-    ds_starting_points["flag"] = xr.zeros_like(ds_starting_points["x"], dtype=int)
+    ds_starting_points["flag"] = xr.zeros_like(ds_starting_points["x"], dtype=np.int32)
 
     ref_time = ds_starting_points.time
     ds_starting_points = ds_starting_points.assign_coords({"ref_time": ref_time})
