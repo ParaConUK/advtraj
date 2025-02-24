@@ -4,6 +4,7 @@ at a single point in time using the position scalars.
 """
 import math
 
+import numpy as np
 import xarray as xr
 from tqdm import tqdm
 
@@ -158,7 +159,7 @@ def backward(
         # Error in back trajectory is not quantifiable. Set to NaN.
         for c in "xyz":
             ds_traj_posn_prev[f"{c}_err"] = xr.full_like(
-                ds_traj_posn_prev[c], -1, dtype="float32"
+                ds_traj_posn_prev[c], -1, dtype=np.float32
             )
 
         flags = datasets[-1].flag.values & ENTERED

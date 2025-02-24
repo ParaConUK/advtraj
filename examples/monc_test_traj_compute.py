@@ -8,6 +8,7 @@ import os
 import time
 from pathlib import Path
 
+# import numpy as np
 import xarray as xr
 from cohobj.object_tools import get_object_labels, unsplit_objects
 from load_data import load_data
@@ -145,6 +146,9 @@ def main(
 
     print(ds)
 
+    # Essential if mask is a dask array
+    mask.load()
+
     ds_starting_points = mask_to_positions(mask).rename(
         {"pos_number": "trajectory_number"}
     )
@@ -156,7 +160,7 @@ def main(
 
     time1 = time.perf_counter()
 
-    ds = load_data(files=files, ref_dataset=ref_dataset, fields_to_keep=["w", "th"])
+    ds = load_data(files=files, ref_dataset=ref_dataset)
 
     print(ds)
 
@@ -167,6 +171,7 @@ def main(
         steps_forward=steps_forward,
         interp_order=interp_order,
         forward_solver=minim,
+        vertical_boundary_option=2,
         point_iter_kwargs=options["pioptions"],
         minim_kwargs=options["minoptions"],
     )
@@ -191,8 +196,13 @@ def main(
             .drop("time")
         )
 
-        ds_traj = ds_traj.assign_coords({"object_label": olab.data})
+        ds_traj = ds_traj.assign_coords(
+            {"object_label": ("trajectory_number", olab.data)}
+        )
 
+        ds_traj["object_label"].attrs["nobjects"] = olab.attrs["nobjects"]
+
+        print("Unsplitting objects")
         ds_traj = unsplit_objects(ds_traj, Lx, Ly)
 
     ds_traj.to_netcdf(output_path)
