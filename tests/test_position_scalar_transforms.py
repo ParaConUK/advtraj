@@ -27,10 +27,16 @@ def test_position_scalar_transforms_are_symmetric():
     # (and the last (x, y) = (Lx-dx, Ly-dy)).
     # However, 0 sometimes fails the test, being mapped to Lx/y
     # depending on platform. Note that in practice mapping to Lx/y would not
-    # be a problem as it will be picked up byth ewrapping code.
-    ds_pts["x"] = "pt", np.linspace(ds_grid.x.min(), ds_grid.x.max(), N_pts)
-    ds_pts["y"] = "pt", np.linspace(ds_grid.y.min(), ds_grid.y.max(), N_pts)
-    ds_pts["z"] = "pt", np.linspace(ds_grid.z.min(), ds_grid.z.max(), N_pts)
+    # be a problem as it will be picked up by the wrapping code.
+    ds_pts["x"] = "pt", np.linspace(
+        ds_grid.x.min().item(), ds_grid.x.max().item(), N_pts
+    )
+    ds_pts["y"] = "pt", np.linspace(
+        ds_grid.y.min().item(), ds_grid.y.max().item(), N_pts
+    )
+    ds_pts["z"] = "pt", np.linspace(
+        ds_grid.z.min().item(), ds_grid.z.max().item(), N_pts
+    )
 
     for xy_periodic in [True, False]:
         ds_grid["xy_periodic"] = xy_periodic
