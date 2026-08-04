@@ -26,6 +26,7 @@ dependencies = [
     "numba",
     "tqdm",
     "networkx",
+    "loguru",
 	]
 
 [tool.setuptools.packages.find]
