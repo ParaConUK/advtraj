@@ -18,7 +18,7 @@ minim = "fixed_point_iterator"
 
 interp_order = 5
 
-expt = "std"
+expt = "ref"
 
 # root_path = "C:/Users/paclk/OneDrive - University of Reading/ug_project_data/Data/"
 root_path = "F:/Data/ug_project_data/"

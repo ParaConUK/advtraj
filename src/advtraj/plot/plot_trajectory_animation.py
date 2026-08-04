@@ -143,7 +143,7 @@ def plot_traj_animation(
     )  # ds_traj.attrs["trajectory timestep"]
 
     ntimes = ds_traj.time.size
-
+    print(ds_traj)
     if "object_label" not in ds_traj.coords:
 
         obj_lab = xr.DataArray(
@@ -177,12 +177,16 @@ def plot_traj_animation(
             )
             with_boxes = False
 
-    if select is None and nobj is not None:
-        select = np.arange(0, nobj)
-    else:
-        select = [0]
+    if select is None:
+        if nobj > 0:
+            select = np.arange(0, nobj)
+        else:
+            select = [0]
 
-    var = ["x", "y", "z", "flag"]
+    var = ["x", "y", "z"]
+
+    if "flag" in ds_traj.data_vars:
+        var.append("flag")
 
     if plot_mask:
         var.append("object_mask")
@@ -243,7 +247,7 @@ def plot_traj_animation(
         legend_title = "Object Number"
 
     if legend:
-        plt.legend(title=legend_title, loc="upper center", ncol=ncolmax)
+        plt.legend(title=legend_title, loc="upper center", ncol=ncolmax, markerscale=4)
 
     # animation function.  This is called sequentially
     def animate_trplt(itime):
@@ -259,7 +263,9 @@ def plot_traj_animation(
 
         if plot_field:
 
-            field_mask_at_time = mask_to_positions(field_mask.sel(time=plot_time))
+            field_mask_at_time = mask_to_positions(
+                field_mask.sel(time=plot_time, method="nearest", tolerance=1.0),
+            )
 
             _update_field_plot(
                 field_mask_at_time,
@@ -325,10 +331,11 @@ def plot_traj_animation(
                     )
 
                 nplt += 1
-        print(type(plot_time))
-        print(str(plot_time))
+        # print(type(plot_time))
+        # print(str(plot_time))
         ax.set_title(
-            f"{title}\nTime index {itime:03d} Time={plot_time} Ref={ref_time}."
+            f"{title}\nTime index {itime:03d} Time={np.round(plot_time)} "
+            f"Ref={np.round(ref_time)}."
             # f"{title}\nTime index {itime:03d} Time={plot_time} Ref={ref_time}."
         )
 
@@ -353,14 +360,14 @@ def plot_traj_animation(
             fig, animate_trplt, frames=ntimes, interval=1000.0 / fps, blit=False
         )
 
-        plt.show()
-
         if anim_name is not None:
             anim_type = anim_name.split(".")[-1]
             if anim_type == "gif":
                 anim.save(anim_name, writer="imagemagick", fps=fps)
             elif anim_type == "mp4":
                 anim.save(anim_name, fps=fps)
+
+        plt.show()
 
         # if save_anim : #, extra_args=['-vcodec', 'libx264'])
         return anim
@@ -885,7 +892,12 @@ def _update_obj_plot(
 
     x, y, z = _get_xyz(traj, itime, xlim, ylim, Lx, Ly, galilean, timestep)
 
-    good = traj.flag <= 1
+    if "flag" in traj.data_vars:
+        good = traj.flag <= 1
+
+    else:
+
+        good = np.ones_like(x, dtype=bool)
 
     x = x[good]
     y = y[good]
