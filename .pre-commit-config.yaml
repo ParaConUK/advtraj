@@ -11,7 +11,8 @@ repos:
     rev: 8.0.1
     hooks:
       - id: isort
-        args: [--profile, black]
+        name: isort(python)
+        args: [--profile, black, --filter-files]
   # https://github.com/python/black#version-control-integration
   - repo: https://github.com/psf/black
     rev: 26.5.1
