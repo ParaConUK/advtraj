@@ -3,6 +3,7 @@
 monc_plot_traj_anim.py
 Plot trajectory animations.
 """
+
 from pathlib import Path
 
 import xarray as xr

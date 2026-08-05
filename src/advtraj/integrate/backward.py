@@ -2,6 +2,7 @@
 Functionality for computing trajectories backward from a set of starting points
 at a single point in time using the position scalars.
 """
+
 import math
 import sys
 
