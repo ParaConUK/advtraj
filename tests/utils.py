@@ -110,7 +110,7 @@ def create_initial_dataset(dL, L, xy_periodic=True):
     dx, dy, dz = dL
     ds_grid = create_uniform_grid(dL=dL, L=L)
 
-    ds_grid.attrs["xy_periodic"] = xy_periodic
+    ds_grid.attrs["grid_type"] = "xy_periodic"
 
     ds = init_position_scalars(ds=ds_grid)
     ds = ds.assign_coords(time=np.datetime64("2020-01-01T00:00"))

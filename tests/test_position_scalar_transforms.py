@@ -40,9 +40,8 @@ def test_position_scalar_transforms_are_symmetric():
 
     for xy_periodic in [True, False]:
         ds_grid["grid_type"] = "xy_periodic" if xy_periodic else "lam"
-        grid_type = ds_grid["grid_type"]
         ds_position_scalars_pts = advtraj_gm_utils.grid_locations_to_position_scalars(
-            ds_grid=ds_grid, ds_pts=ds_pts, grid_type=grid_type
+            ds_grid=ds_grid, ds_pts=ds_pts
         )
         ds_grid_idxs_pts = advtraj_gm_utils.estimate_initial_grid_indices(
             ds_position_scalars=ds_position_scalars_pts, N_grid=dict(x=nx, y=ny)
@@ -65,7 +64,7 @@ def test_position_scalars_translation():
     dx = dy = dz = 25.0  # [m]
 
     ds_grid = create_uniform_grid(dL=(dx, dy, dz), L=(Lx, Ly, Lz))
-    ds_grid.attrs["xy_periodic"] = True
+    ds_grid["grid_type"] = "xy_periodic"
     nx, ny = int(ds_grid.x.count()), int(ds_grid.y.count())
 
     ds = init_position_scalars(ds=ds_grid)

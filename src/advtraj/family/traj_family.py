@@ -5,6 +5,7 @@ Created on Fri Dec 23 10:29:03 2022
 @author: Peter Clark
 
 """
+
 import math
 import time
 from pathlib import Path
@@ -497,7 +498,7 @@ def find_matching_objects(
         b_test = traj_box.sel(time=match_time_back)
         if np.isnan(b_test.x_min).item():
             return matching_objects_at_time
-        (dummy, all_matching_objects) = find_match_obj_at_time(
+        dummy, all_matching_objects = find_match_obj_at_time(
             traj_iobj,
             b_test,
             # traj_box,
@@ -534,7 +535,7 @@ def find_matching_objects(
                 #       f"{match_time_back=}")
                 continue
 
-            (matching_objects_at_time, all_matching_objects) = find_match_obj_at_time(
+            matching_objects_at_time, all_matching_objects = find_match_obj_at_time(
                 traj_iobj,
                 b_test,
                 traj_box,
@@ -967,9 +968,7 @@ def _graph_matches(G, node, match_time, matches, ntype):
 def graph_matching_objects(
     mol_family: dict,
     include_types: Union[
-        Tuple[
-            int,
-        ],
+        Tuple[int,],
         None,
     ] = None,
 ) -> nx.DiGraph:
@@ -1134,9 +1133,7 @@ def related_objects(
     ref_times_sel: Union[list, None] = None,
     overlap_thresh: Union[float, None] = None,
     ntypes: Union[
-        Tuple[
-            int,
-        ],
+        Tuple[int,],
         None,
     ] = None,
 ) -> list:
@@ -1226,9 +1223,7 @@ def draw_object_graph(
     highlight_nodes: list = None,
     overlap_thresh: float = None,
     ntypes: Union[
-        Tuple[
-            int,
-        ],
+        Tuple[int,],
         None,
     ] = None,
     figsize: Union[Tuple[float, float], None] = None,
@@ -1281,7 +1276,7 @@ def draw_object_graph(
 
     maxy = 0
     for n in G.nodes():
-        (x, y) = n
+        x, y = n
         maxy = max(maxy, y)
         pos[n] = [x, y]
         if x not in times:
@@ -1307,9 +1302,11 @@ def draw_object_graph(
     ]
 
     edgewidth = [
-        G.get_edge_data(u, v)["max_overlap"] * 5 + 1
-        if "max_overlap" in G.edges[u, v].keys()
-        else 1
+        (
+            G.get_edge_data(u, v)["max_overlap"] * 5 + 1
+            if "max_overlap" in G.edges[u, v].keys()
+            else 1
+        )
         for u, v in edgelist
     ]
 

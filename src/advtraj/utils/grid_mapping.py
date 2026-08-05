@@ -193,7 +193,6 @@ def grid_indices_to_position_scalars(i, j, k, nx, ny, nz, grid_type=None):
 
 
 def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
-
     nx = int(ds_grid.x.size)
     ny = int(ds_grid.y.size)
     nz = int(ds_grid.z.size)

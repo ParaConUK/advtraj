@@ -141,7 +141,7 @@ def combine_traj_classes(traj_class: tuple):
     for keys in product(*keylist):
         mask = xr.full_like(traj_class[0]["class"], True, dtype=bool)
         new_key = []
-        for (k, tr) in zip(keys, traj_class):
+        for k, tr in zip(keys, traj_class):
             mask = np.logical_and(mask, tr["class"] == k)
             new_key.append(tr["key"][k])
 
@@ -194,7 +194,7 @@ def print_class(traj, traj_cl, sel_obj=None, list_classes=True):
             tr_class = traj["class_no"]
 
             strout = "time "
-            for (iclass, key) in enumerate(traj_cl["key"]):
+            for iclass, key in enumerate(traj_cl["key"]):
                 strout += f"{iclass:5d} "
             strout += " total"
             print(strout)

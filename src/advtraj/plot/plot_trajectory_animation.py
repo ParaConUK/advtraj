@@ -491,7 +491,7 @@ def plot_family_animation(
     time_max = -1e100
 
     # for ds in traj_family:
-    for (obj_time, objnum) in obj_list:
+    for obj_time, objnum in obj_list:
         obj_index = ref_times.index(obj_time)
         ds = traj_family[obj_index]
         time_min = min(time_min, ds.time.values.min())
@@ -656,7 +656,7 @@ def init_figure(figsize, view_point, x_lim, y_lim, z_lim, uniform_aspect=True):
     fig = plt.figure(figsize=figsize)  # , tight_layout=True)
     ax = fig.add_subplot(111, projection="3d")
 
-    (elev, azim) = view_point
+    elev, azim = view_point
     ax.view_init(elev, azim)
 
     ax.set_xlim(x_lim[0], x_lim[1])
@@ -781,7 +781,7 @@ def create_family_obj_lines(
 
     for obj in obj_list:
         # print(f'Processing {obj=}')
-        (match_time, objnum) = obj
+        match_time, objnum = obj
 
         lab = f"{match_time}: {objnum}"
         if obj in highlight_obj:
@@ -876,7 +876,7 @@ def _update_field_plot(
 def _update_class_plot(traj, itime, xlim, ylim, Lx, Ly, galilean, timestep, line_list):
     x, y, z = _get_xyz(traj, itime, xlim, ylim, Lx, Ly, galilean, timestep)
 
-    for (line, class_no) in line_list:
+    for line, class_no in line_list:
         in_cl = traj.class_no == class_no
         line.set_data(x[in_cl].values, y[in_cl].values)
         line.set_3d_properties(z[in_cl].values)
@@ -917,13 +917,13 @@ def _xyz_plot(x, y, z, lines, plot_mask, mask, reset=False):
 
     if reset:
         if plot_mask:
-            (line, line_cl) = lines
+            line, line_cl = lines
             line.set_data([], [])
             line.set_3d_properties([])
             line_cl.set_data([], [])
             line_cl.set_3d_properties([])
         else:
-            (line) = lines
+            line = lines
             line.set_data([], [])
             line.set_3d_properties([])
         return
@@ -932,7 +932,7 @@ def _xyz_plot(x, y, z, lines, plot_mask, mask, reset=False):
         in_obj = mask
         not_in_obj = ~mask
 
-        (line, line_cl) = lines
+        line, line_cl = lines
         line.set_data(x[not_in_obj], y[not_in_obj])
         line.set_3d_properties(z[not_in_obj])
         line_cl.set_data(x[in_obj], y[in_obj])
@@ -964,7 +964,7 @@ def _update_family_obj_plot(
     nplt = 0
     for obj, line in lines.items():
         # print(f'Plotting {obj=}')
-        (match_time, objnum) = obj
+        match_time, objnum = obj
         traj_ref = ds_list[ref_times.index(match_time)]
         if plot_time in traj_ref.time:
             # print(f"{match_time=}")
@@ -1050,7 +1050,7 @@ def _update_family_box_plot(
     nplt = 0
     for obj, box in boxes.items():
         # print(f'Plotting {obj=}')
-        (match_time, objnum) = obj
+        match_time, objnum = obj
         # print(bb_list)
         # print(match_time)
 
