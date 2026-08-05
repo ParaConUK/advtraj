@@ -2,7 +2,15 @@
 
 ## [Unreleased](https://github.com/ParaConUK/advtraj/tree/HEAD)
 
-[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.4...HEAD)
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.6.0...HEAD)
+
+*new features*
+
+- Added support for UM Global with 4 trajectory tracers.
+
+## [v0.6.0](https://github.com/ParaConUK/advtraj/tree/v0.6.0)
+
+[Full Changelog](https://github.com/ParaConUK/advtraj/compare/v0.5.3...v0.6.0)
 
 ## [v0.5.4](https://github.com/ParaConUK/advtraj/tree/v0.5.4)
 
