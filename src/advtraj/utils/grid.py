@@ -1,27 +1,28 @@
 """
-    grid.py
+grid.py
 
-    Utilities to deal with grid wrapping etc.
+Utilities to deal with grid wrapping etc.
 
-    Currently, caters for the following grid styles:
+Currently, caters for the following grid styles:
 
-    "cell_centred"
-    - p-point (cell centre) p[0, 0, 0]] at x = dx/2, y = dy/2, z = dz/2.
-    - u-point (cell face) u[0, 0, 0] at p[0, 0, 0] - dx/2, i.e. x = 0.
-    - v-point (cell face) v[0, 0, 0] at p[0, 0, 0] - dy/2, i.e. y = 0.
-    - w-point (cell face) w[0, 0, 0] at p[0, 0, 0] - dz/2, i.e. z = 0.
-    - Virtual p point at z = -dz/2.
+"cell_centred"
+- p-point (cell centre) p[0, 0, 0]] at x = dx/2, y = dy/2, z = dz/2.
+- u-point (cell face) u[0, 0, 0] at p[0, 0, 0] - dx/2, i.e. x = 0.
+- v-point (cell face) v[0, 0, 0] at p[0, 0, 0] - dy/2, i.e. y = 0.
+- w-point (cell face) w[0, 0, 0] at p[0, 0, 0] - dz/2, i.e. z = 0.
+- Virtual p point at z = -dz/2.
 
-    "monc"
-    - Virtual p points at z = -dz/2 so:
-    - p-point (cell centre) p[0, 0, 0]] at x = dx/2, y = dy/2, z = -dz/2.
-    - u-point (cell face) u[0, 0, 0] at p[0, 0, 0] + dx/2, i.e. x = dx.
-    - v-point (cell face) v[0, 0, 0] at p[0, 0, 0] + dy/2, i.e. y = dy.
-    - w-point (cell face) w[0, 0, 0] at p[0, 0, 0] + dz/2, i.e. z = 0.
+"monc"
+- Virtual p points at z = -dz/2 so:
+- p-point (cell centre) p[0, 0, 0]] at x = dx/2, y = dy/2, z = -dz/2.
+- u-point (cell face) u[0, 0, 0] at p[0, 0, 0] + dx/2, i.e. x = dx.
+- v-point (cell face) v[0, 0, 0] at p[0, 0, 0] + dy/2, i.e. y = dy.
+- w-point (cell face) w[0, 0, 0] at p[0, 0, 0] + dz/2, i.e. z = 0.
 
-    ""
-    - All points [0, 0, 0] at x = 0, y = 0, z = 0.
+""
+- All points [0, 0, 0] at x = 0, y = 0, z = 0.
 """
+
 import warnings
 
 import numpy as np
@@ -54,8 +55,6 @@ def wrap_periodic_grid_coords(
     are using cell-centered
     """
 
-    ds_posn_copy = ds_posn.copy()
-
     for c in cyclic_coords:
         da_coord = ds_grid[c]
         dc = find_coord_grid_spacing(da_coord=da_coord)
@@ -68,15 +67,15 @@ def wrap_periodic_grid_coords(
             c_max += dc
 
         # Now wrap the position where needed
-        wrapped_c = wrap_posn(ds_posn_copy[c].values, c_min=c_min, c_max=c_max)
+        wrapped_c = wrap_posn(ds_posn[c].values, c_min=c_min, c_max=c_max)
 
         # Now update variable c with wrapped values, including dim[0],
         # which should be 'trajectory_number', if available.
         # Do not include dim if it's not in the orriginal.
 
-        ds_posn[c] = ds_posn_copy[c].copy(data=wrapped_c)
+        ds_posn[c] = ds_posn[c].copy(data=wrapped_c)
 
-    return ds_posn_copy
+    return ds_posn
 
 
 def wrap_coords(ds_posn, ds_grid):
