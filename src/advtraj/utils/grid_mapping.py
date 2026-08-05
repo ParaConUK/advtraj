@@ -40,7 +40,7 @@ def estimate_initial_grid_indices(ds_position_scalars, N_grid=dict()):
     Using the position scalars `ds_position_scalars` estimate the original grid
     locations (ijk-indices) that the position scalars were advected from
     """
-
+    print(f"estimate_initial_grid_indices: {ds_position_scalars=}")
     if "grid_type" not in ds_position_scalars.attrs:
         logger.error("Attribute grid type not set.")
         raise Exception(
@@ -48,11 +48,11 @@ def estimate_initial_grid_indices(ds_position_scalars, N_grid=dict()):
             " `ds_position_scalars` to 'lam', 'xy_periodic' or 'global'"
         )
     else:
-        grid_type = ds_position_scalars.grid_type
+        grid_type = ds_position_scalars.attrs["grid_type"]
 
     grid_names = dict(x="i", y="j", z="k")
     da_indices = []
-    match grid_type:
+    match grid_type.lower():
         case "lam":
             for dim in "xy":
                 grid_id = ds_position_scalars[f"traj_tracer_{dim}r"]
@@ -189,10 +189,16 @@ def grid_indices_to_position_scalars(i, j, k, nx, ny, nz, grid_type=None):
 
     ds["traj_tracer_zr"] = k
     ds.attrs[grid_type] = grid_type
+
+    print(f"grid_indices_to_position_scalars: {ds=}")
     return ds
 
 
 def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
+
+    print(f"grid_locations_to_position_scalars: {ds_grid=}")
+    print(f"grid_locations_to_position_scalars: {ds_pts=}")
+
     nx = int(ds_grid.x.size)
     ny = int(ds_grid.y.size)
     nz = int(ds_grid.z.size)
@@ -222,7 +228,8 @@ def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
         ds_indices["j"] = j_
         ds_indices["k"] = k_
 
-    grid_type = ds_grid.grid_type
+    grid_type = ds_grid.attrs["grid_type"]
+    print(f"{grid_type=}")
 
     ds_position_scalars = grid_indices_to_position_scalars(
         i=ds_indices.i,
