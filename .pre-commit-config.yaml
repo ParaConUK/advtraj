@@ -11,13 +11,13 @@ repos:
     rev: 8.0.1
     hooks:
       - id: isort
-    args: [--profile, black]
+        args: [--profile, black]
   # https://github.com/python/black#version-control-integration
   - repo: https://github.com/psf/black
     rev: 26.5.1
     hooks:
       - id: black
-    args: [ --target-version, py312 ]
+        args: [--target-version, py312 ]
   - repo: https://github.com/PyCQA/flake8
     rev: 7.3.0
     hooks:
