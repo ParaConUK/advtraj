@@ -28,16 +28,16 @@ def pjit(func):
 # utility to allow construction of TypedList with Float/Int types (always promoted to float)
 
 
-def FloatList(l):
-    return List([float(lh) for lh in l])
+def FloatList(li):
+    return List([float(lh) for lh in li])
 
 
-def IntList(l):
-    return List([int(lh) for lh in l])
+def IntList(li):
+    return List([int(lh) for lh in li])
 
 
-def BoolList(l):
-    return List([bool(lh) for lh in l])
+def BoolList(li):
+    return List([bool(lh) for lh in li])
 
 
 ################################################################################

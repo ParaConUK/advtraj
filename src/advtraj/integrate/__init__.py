@@ -1,8 +1,10 @@
 """
 Main routines for integration
 """
+
 import numpy as np
 import xarray as xr
+from loguru import logger
 
 from .backward import backward as integrate_backward
 from .forward import forward as integrate_forward
@@ -11,7 +13,7 @@ POSITION_VAR_NAMES = ["x", "y", "z"]
 EXPECTED_STARTING_POSITION_COORDS = ["time", "trajectory_number"]
 
 
-def _validate_position_scalars(ds, xy_periodic=False):
+def _validate_position_scalars(ds):
     """
     Ensure that the required position scalars are available in the provided
     dataset (depending on whether we're using periodic boundaries in the
@@ -20,8 +22,15 @@ def _validate_position_scalars(ds, xy_periodic=False):
     required_coords = POSITION_VAR_NAMES
     required_vars = ["traj_tracer_xr", "traj_tracer_yr", "traj_tracer_zr"]
 
-    if xy_periodic:
-        required_vars += ["traj_tracer_xi", "traj_tracer_yi"]
+    grid_type = ds.attrs.get("grid_type", None)
+
+    match grid_type:
+        case "xy_periodic":
+            required_vars += ["traj_tracer_xi", "traj_tracer_yi"]
+        case "global":
+            required_vars += ["traj_tracer_xi"]
+        case None:
+            raise ValueError('"grid_type" not present in dataset attributes.')
 
     missing_vars = list(filter(lambda c: c not in ds, required_vars))
 
@@ -80,25 +89,36 @@ def _promote_starting_position_vars_to_coords(ds):
     return ds
 
 
-def _set_coord_attrs(ds, xy_periodic):
+def _set_coord_attrs(ds):
     """
     Add grid spacing attribute dx etc. to position coordinates
     """
+    grid_type = ds.attrs.get("grid_type", None)
+
     for c in POSITION_VAR_NAMES:
         dc = f"d{c}"
         coord = ds[c]
         if dc not in coord.attrs:
             dc_val = coord.values[1] - coord.values[0]
             ds[c].attrs[dc] = dc_val
-            print(f"{dc} set to {ds[c].attrs[dc]}")
-            if xy_periodic and c in "xy":
-                ds[c].attrs[f"L{c}"] = coord.values[-1] - coord.values[0] + dc_val
-            else:
-                ds[c].attrs[f"L{c}"] = coord.values[-1] - coord.values[0]
+            logger.info(f"{dc} set to {ds[c].attrs[dc]}")
+
+            match grid_type:
+                case "lam":
+                    ds[c].attrs[f"L{c}"] = coord.values[-1] - coord.values[0]
+                case "xy_periodic" | "global":
+                    if c in "xy":
+                        ds[c].attrs[f"L{c}"] = (
+                            coord.values[-1] - coord.values[0] + dc_val
+                        )
+                    else:
+                        ds[c].attrs[f"L{c}"] = coord.values[-1] - coord.values[0]
+                case None:
+                    raise ValueError('"grid_type" not present in dataset attributes.')
     return ds
 
 
-def _set_data_precision(ds, precision=np.float32):
+def set_data_precision(ds, precision=np.float32):
     for var in ds.data_vars:
         da = ds[var]
         ds[var] = da.astype(precision)
@@ -110,10 +130,10 @@ def integrate_trajectories(
     ds_starting_points,
     steps_backward=None,
     steps_forward=None,
-    xy_periodic=True,
     interp_order=5,
     forward_solver="fixed_point_iterator",
     vertical_boundary_option=1,
+    opt_one_step=False,
     output_path=None,
     aux_coords=None,
     point_iter_kwargs=None,
@@ -126,12 +146,20 @@ def integrate_trajectories(
     starting points in `ds_starting_points` to times as in `times`
     """
 
-    ds_starting_points = _set_data_precision(ds_starting_points)
+    if "fixed_point_iterator" not in forward_solver:
+        logger.warning(
+            f"{forward_solver=}: "
+            f'Use of solver other than "fixed_point_iterator" '
+            f'or "hybrid fixed_point_iterator" not recommended.'
+        )
 
     ds_starting_points = _promote_starting_position_vars_to_coords(
         ds=ds_starting_points
     )
-    _validate_position_scalars(ds=ds_position_scalars, xy_periodic=xy_periodic)
+
+    ds_starting_points = set_data_precision(ds_starting_points)
+
+    _validate_position_scalars(ds=ds_position_scalars)
     _validate_starting_points(ds=ds_starting_points)
 
     for c in POSITION_VAR_NAMES:
@@ -144,15 +172,16 @@ def integrate_trajectories(
     ref_time = ds_starting_points.time
     ds_starting_points = ds_starting_points.assign_coords({"ref_time": ref_time})
 
-    ds_position_scalars = _set_coord_attrs(ds_position_scalars, xy_periodic)
+    ds_position_scalars = _set_coord_attrs(ds_position_scalars)
 
-    input_times = list(ds_position_scalars["time"].values)
+    da_times = ds_position_scalars.time
+
+    input_times = list(da_times.values)
+
     if ref_time not in input_times:
         raise ValueError(f"Reference time {ref_time} is not in dataset.")
 
     ref_index = input_times.index(ref_time)
-
-    da_times = ds_position_scalars.time
 
     # Select start and end time of trajectories.
     if steps_backward is None:
@@ -173,7 +202,7 @@ def integrate_trajectories(
             )
         end_index = min(len(input_times), ref_index + max(0, int(steps_forward)) + 1)
 
-    da_times = ds_position_scalars.time.isel(time=slice(start_index, end_index))
+    da_times = da_times.isel(time=slice(start_index, end_index))
 
     da_times_backward = da_times.sel(time=slice(None, ref_time))
     da_times_forward = da_times.sel(time=slice(ref_time, None)).isel(
@@ -188,6 +217,7 @@ def integrate_trajectories(
         ds_starting_point=ds_starting_points,
         da_times=da_times_backward,
         interp_order=interp_order,
+        vertical_boundary_option=vertical_boundary_option,
         output_path=output_path,
         aux_coords=aux_coords,
     )
@@ -199,6 +229,7 @@ def integrate_trajectories(
         interp_order=interp_order,
         solver=forward_solver,
         vertical_boundary_option=vertical_boundary_option,
+        opt_one_step=opt_one_step,
         point_iter_kwargs=point_iter_kwargs,
         minim_kwargs=minim_kwargs,
         output_path=output_path,

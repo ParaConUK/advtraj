@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug  4 19:57:41 2026
+
+@author: xm904103
+"""
+
 import numpy as np
-import pytest
 import xarray as xr
 from utils import create_uniform_grid
 
@@ -11,10 +17,11 @@ def test_wrap_coord_posn():
     x = np.array([-100.0, 0.0, Lx / 2.0, Lx, Lx + 100.0])
     x_wrapped_true = np.array([Lx - 100.0, 0.0, Lx / 2.0, 0.0, 100.0])
     x_wrapped = grid_utils.wrap_posn(c=x, c_min=0.0, c_max=Lx)
+    print(x_wrapped_true, x_wrapped)
     np.testing.assert_allclose(x_wrapped_true, x_wrapped)
 
 
-@pytest.mark.parametrize("grid_style", ["cell_centered", "monc", ""])
+# @pytest.mark.parametrize("grid_style", ["cell_centered", "monc", ""])
 def test_cyclic_coord_wrapping(grid_style):
     dx = 25.0
     dL = (dx, dx, dx)
@@ -66,3 +73,10 @@ def test_cyclic_coord_wrapping(grid_style):
         )
 
         np.testing.assert_allclose(_pt_from_dataset(ds_pt_wrapped), pt_wrapped_correct)
+
+        print(_pt_from_dataset(ds_pt_wrapped), pt_wrapped_correct)
+
+
+test_wrap_coord_posn()
+for grid_style in ["cell_centered", "monc"]:
+    test_cyclic_coord_wrapping(grid_style)

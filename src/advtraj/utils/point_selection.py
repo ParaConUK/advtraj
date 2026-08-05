@@ -4,6 +4,7 @@ Created on Fri Jul 22 12:04:57 2022
 
 @author: paclk
 """
+
 import numpy as np
 import xarray as xr
 
@@ -30,6 +31,8 @@ def mask_to_positions(mask: xr.DataArray) -> xr.Dataset:
         .dropna(dim="pos_number")
     )
 
+    # pos_number = np.arange(poi.pos_number.size)
+
     # print(f'{poi=}')
     # # now we'll turn this 1D dataset where (x, y, z) are coordinates into
     # # one where they are variables instead
@@ -48,7 +51,7 @@ def mask_to_positions(mask: xr.DataArray) -> xr.Dataset:
     # print(positions)
 
     positions = (
-        poi.reset_index("pos_number")
+        poi.reset_index(["pos_number", "x", "y", "z"])
         .assign_coords(pos_number=np.arange(poi.pos_number.size))
         .reset_coords(["x", "y", "z"])[["x", "y", "z"]]
     )

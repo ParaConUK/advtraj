@@ -1,18 +1,54 @@
 """
 Calculations for forward trajectory from a point in space and time using the
 position scalars.
+forward
+    extrapolate_single_timestep
+        gen_interpolator_fields
+        --extrapolate first guess
+        confine_traj_bounds
+            regularize_coords
+        -- if fixed_point_iteration
+        backtrack_origin_point_iterate
+            get_error_norm
+                calc_backtrack_origin_dist
+            pt_backtrack_origin_optimize
+                calc_backtrack_origin_err
+                    calc_backtrack_origin_dist
+                        regularize_coords
+                get_error_norm
+                    calc_backtrack_origin_dist
+             regularize_coords
+        -- if optimize
+        ds_backtrack_origin_optimize
+            _pt_ds_to_arr
+            pt_backtrack_origin_optimize
+                calc_backtrack_origin_err
+                    calc_backtrack_origin_dist
+                        wrap_coords
+                get_error_norm
+                    calc_backtrack_origin_dist
+             wrap_coords
+        confine_traj_bounds
+            regularize_coords
+        -- set flags
+        aux_coords_to_traj
+
 """
+
 import math
+import sys
 
 import numpy as np
-import numpy.random as rnd
 import scipy.optimize
 import xarray as xr
+from loguru import logger
+
+# from tqdm.auto import tqdm
 from tqdm import tqdm
 
 from ..utils.data_to_traj import aux_coords_to_traj
-from ..utils.grid import wrap_periodic_grid_coords
-from ..utils.interpolation import gen_interpolator_3d_fields
+from ..utils.grid import confine_traj_bounds, pt_distance
+from ..utils.interpolation import gen_interpolator_fields
 from ..utils.io import ds_save
 from .backward import calc_trajectory_previous_position
 
@@ -24,87 +60,10 @@ LEFT_N_BOUNDARY = 2**8
 
 LEFT = LEFT_W_BOUNDARY | LEFT_E_BOUNDARY | LEFT_S_BOUNDARY | LEFT_N_BOUNDARY
 
-
-def _wrap_coords(ds_posn, ds_grid):
-    """
-    Wrapper for wrap_periodic_grid_coords
-
-    Parameters
-    ----------
-    ds_posn : xarray Dataset
-        Trajectory positions 'x', 'y', 'z'.
-    ds_grid : xarray Dataset
-        grid information.
-
-    Returns
-    -------
-    xarray Dataset
-        Wrapped version of ds_posn.
-
-    """
-    cyclic_coords = ("x", "y")
-    cell_centered_coords = ("x", "y", "z")
-    return wrap_periodic_grid_coords(
-        ds_grid=ds_grid,
-        ds_posn=ds_posn,
-        cyclic_coords=cyclic_coords,
-        cell_centered_coords=cell_centered_coords,
-    )
+is_interactive = sys.stdout.isatty()
 
 
-def _confine_traj_bounds(ds_posn, ds_grid, vertical_boundary_option=1):
-    """
-    Confine trajectory position to domain.
-
-    Parameters
-    ----------
-    pos : numpy array
-        trajectory positions (n, 3).
-    nx : int or float
-        max value of x.
-    ny : int or float
-        max value of y.
-    nz :  int or float
-        max value of z.
-    vertical_boundary_option : int, optional
-        DESCRIPTION. The default is 1.
-
-    Returns
-    -------
-    pos : TYPE
-        DESCRIPTION.
-
-    """
-    if ds_grid.xy_periodic:
-        ds_posn = _wrap_coords(ds_posn, ds_grid)
-
-    if vertical_boundary_option == 1:
-        zmin = ds_grid.z.values.min()
-        zmax = ds_grid.z.values.max()
-        # ds_posn["z"] = np.clip(ds_posn["z"], 0, ds_grid.z.Lz)
-        ds_posn["z"] = np.clip(ds_posn["z"], zmin, zmax)
-
-    elif vertical_boundary_option == 2:
-
-        ds_posn["z"] = np.clip(ds_posn["z"], 0, ds_grid.z.Lz)
-        lam = 1.0 / 0.5
-        k1 = ds_posn.z <= ds_grid.z.dz
-        k2 = ds_posn.z >= (ds_grid.z.Lz - ds_grid.z.dz)
-
-        ds_posn["z"] = xr.where(
-            k1, 1.0 + rnd.exponential(scale=lam, size=k1.shape), ds_posn["z"]
-        )
-        ds_posn["z"] = xr.where(
-            k2,
-            ds_grid.z.Lz
-            - ds_grid.z.dz * (1.0 + rnd.exponential(scale=lam, size=k2.shape)),
-            ds_posn["z"],
-        )
-
-    return ds_posn
-
-
-def _calc_backtrack_origin_dist(
+def calc_backtrack_origin_dist(
     ds_position_scalars,
     ds_traj_posn_org,
     ds_traj_posn,
@@ -116,9 +75,6 @@ def _calc_backtrack_origin_dist(
     (calculated by back-trajectory from `pt_traj_posn_next`)
     """
     ds_grid = ds_position_scalars[["x", "y", "z"]]
-
-    if ds_grid.xy_periodic:
-        ds_traj_posn = _wrap_coords(ds_traj_posn, ds_grid)
 
     # ds_traj_posn_org contains the 'current' (i.e. known) trajectory
     # positions.
@@ -136,55 +92,33 @@ def _calc_backtrack_origin_dist(
         interp_order=interp_order,
     )
 
-    ds_p1 = ds_traj_posn_org
-    ds_p2 = ds_traj_posn_org_guess
-
-    dist_arr = np.array(
-        [
-            ds_p1.x.values - ds_p2.x.values,
-            ds_p1.y.values - ds_p2.y.values,
-            ds_p1.z.values - ds_p2.z.values,
-        ]
+    dist_arr, ndist, in_domain = pt_distance(
+        ds_traj_posn_org, ds_traj_posn_org_guess, ds_grid
     )
 
-    # Deal with xy wraparound.
-    if ds_grid.xy_periodic:
-        Lx = ds_position_scalars["x"].attrs["Lx"]
-        Ly = ds_position_scalars["y"].attrs["Ly"]
-        xerr = np.asarray(dist_arr[0])
-        xerr[xerr > Lx / 2] -= Lx
-        xerr[xerr < -Lx / 2] += Lx
-        yerr = np.asarray(dist_arr[1])
-        yerr[yerr > Ly / 2] -= Ly
-        yerr[yerr < -Ly / 2] += Ly
-        dist_arr = np.array(
-            [
-                xerr,
-                yerr,
-                dist_arr[2],
-            ]
-        )
-        in_domain = None
-    else:
-        in_domain = ds_traj_posn_org.flag.values <= 1
-        # dist_arr = dist_arr[:, in_domain]
-
-    # Deal with single trajectory case
-    if dist_arr.ndim == 1:
-        dist_arr = np.expand_dims(dist_arr, 1)
-    return dist_arr, in_domain
+    return dist_arr, ndist, in_domain
 
 
 def _pt_ds_to_arr(ds_pt):
     return np.array([ds_pt[c].data for c in "xyz"])
 
 
-def _pt_arr_to_ds(arr_pt):
+def _pt_arr_to_ds(arr_pt, ds=None):
+
     # Ensure arr_pt has 2 dimensions.
     arr_pt = arr_pt.reshape((3, -1))
-    ds_pt = xr.Dataset()
-    for n, c in enumerate("xyz"):
-        ds_pt[c] = xr.DataArray(arr_pt[n, :], dims=("trajectory_number"))
+
+    if ds is None:
+
+        ds_pt = xr.Dataset()
+        for n, c in enumerate("xyz"):
+            ds_pt[c] = xr.DataArray(arr_pt[n, :], dims=("trajectory_number"))
+
+    else:
+
+        ds_pt = ds.copy()
+        for n, c in enumerate("xyz"):
+            ds_pt[c] = ds[c].copy(data=arr_pt[n, :])
 
     return ds_pt
 
@@ -198,7 +132,7 @@ def get_error_norm(
     interpolator=None,
     interp_order=5,
 ):
-    dist, in_domain = _calc_backtrack_origin_dist(
+    dist, ndist, in_domain = calc_backtrack_origin_dist(
         scalars,
         pos_org,
         pos_est,
@@ -206,36 +140,39 @@ def get_error_norm(
         interp_order=interp_order,
     )
 
-    ndist = dist / grid_spacing
     if in_domain is None:
         ndist_valid = ndist
     else:
         ndist_valid = ndist[:, in_domain]
 
     if norm == "max_abs_error":
+        # 	max(abs(x))
         err = np.linalg.norm(ndist_valid.flatten(), ord=np.inf)
     elif norm == "mean_abs_error":
-        err = np.mean(np.abs(ndist_valid))
+        # mean(abs(x))
+        err = np.mean(np.abs(ndist_valid.flatten()))
     else:
+        # 2-norm(x.ravel) / N = sqrt(sum(abs(x)**2))/sqrt(N)
+        # i.e. RMS
         err = np.linalg.norm(ndist_valid.flatten()) / np.sqrt(ndist_valid.size)
 
     return dist, in_domain, ndist, err
 
 
-def _backtrack_origin_point_iterate(
+def backtrack_origin_point_iterate(
     ds_position_scalars,
     ds_traj_posn_org,
     ds_traj_posn_first_guess,
     interpolator,
     solver,
     interp_order=5,
+    opt_one_step=False,
     maxiter=200,
     miniter=10,
     disp=False,
     relax=1.0,
     relax_reduce=0.95,
     tol=0.01,
-    opt_one_step=False,
     norm="max_abs_error",
     max_outer_loops=1,
     minim_kwargs=None,
@@ -299,13 +236,8 @@ def _backtrack_origin_point_iterate(
         New trajectory position and residual error vector.
 
     """
-    grid_spacing = np.array(
-        [
-            ds_position_scalars["x"].attrs["dx"],
-            ds_position_scalars["y"].attrs["dy"],
-            ds_position_scalars["z"].attrs["dz"],
-        ]
-    )
+
+    grid_spacing = np.array([ds_position_scalars[c].attrs[f"d{c}"] for c in "xyz"])
 
     grid_spacing = grid_spacing[:, np.newaxis]
 
@@ -365,11 +297,21 @@ def _backtrack_origin_point_iterate(
     if niter >= maxiter:
         # Select out those trajectories that have not converged.
         ncm = np.abs(ndist) > tol
-        not_conv_mask = ncm[0, :] | ncm[1, :] | ncm[2, :]
-        print(
-            f"\nPoint Iteration failed to converge "
+        not_conv_mask = ncm[0, :]
+        for d in range(1, ncm.shape[0]):
+            not_conv_mask = not_conv_mask | ncm[d, :]
+
+        message = (
+            f"Point Iteration failed to converge "
             f"in {niter:3d} iterations. "
             f"{np.sum(not_conv_mask)} trajectories did not converge. "
+            f"Final error = {err}"
+        )
+
+    else:
+        message = (
+            f"Point Iteration converged "
+            f"in {niter:3d} iterations. "
             f"Final error = {err}"
         )
 
@@ -381,7 +323,7 @@ def _backtrack_origin_point_iterate(
         # Select unconverged trajectories.
         pt_traj_posn_next_not_conv = pt_traj_posn_next[:, not_conv_mask]
 
-        print(
+        message = (
             f"Optimising {pt_traj_posn_next_not_conv.shape[1]} "
             f"unconverged trajectories."
         )
@@ -396,7 +338,7 @@ def _backtrack_origin_point_iterate(
         # First option is likely to be deprecated in future.
         if opt_one_step:
             pt_traj_posn_next_not_conv = pt_traj_posn_next_not_conv.flatten()
-            pt_traj_posn_next_not_conv = _pt_backtrack_origin_optimize(
+            pt_traj_posn_next_not_conv = pt_backtrack_origin_optimize(
                 ds_position_scalars,
                 ds_traj_posn_org_subset,
                 pt_traj_posn_next_not_conv,
@@ -405,15 +347,22 @@ def _backtrack_origin_point_iterate(
                 **minim_kwargs,
             )
         else:
-            for itraj in range(pt_traj_posn_next_not_conv.shape[1]):
+            for itraj in tqdm(
+                range(pt_traj_posn_next_not_conv.shape[1]),
+                desc="Optimising",
+                position=1,
+                disable=not is_interactive,
+                dynamic_ncols=is_interactive,
+            ):
 
                 tr_num = ds_traj_posn_org_subset.trajectory_number.values[itraj]
-                print(f"Optimising unconverged trajectory {itraj}: {tr_num}.")
+                # tqdm.write(f"Optimising unconverged trajectory {itraj}: {tr_num}.")
+                # print(f"Optimising unconverged trajectory {itraj}: {tr_num}.")
                 pt_traj_posn = pt_traj_posn_next_not_conv[:, itraj].flatten()
                 ds_traj_posn_orig = ds_traj_posn_org_subset.sel(
                     trajectory_number=tr_num
                 )
-                pt_traj_posn = _pt_backtrack_origin_optimize(
+                pt_traj_posn = pt_backtrack_origin_optimize(
                     ds_position_scalars,
                     ds_traj_posn_orig,
                     pt_traj_posn,
@@ -429,7 +378,13 @@ def _backtrack_origin_point_iterate(
             (3, -1)
         )
         # Convert to Dataset
-        ds_traj_posn_next = _pt_arr_to_ds(pt_traj_posn_next)
+        # ds_traj_posn_next_data = _pt_arr_to_ds(pt_traj_posn_next)
+
+        for idim, c in enumerate("xyz"):
+            ds_traj_posn_next.update(
+                {c: ("trajectory_number", pt_traj_posn_next[idim, :])}
+            )
+
         # Calculate final error.
         dist, in_domain, ndist, err = get_error_norm(
             ds_position_scalars,
@@ -441,19 +396,22 @@ def _backtrack_origin_point_iterate(
             interp_order=interp_order,
         )
         ncm = np.abs(ndist) > tol
-        not_conv_mask = ncm[0, :] | ncm[1, :] | ncm[2, :]
-        print(f"After minimization error={err}.")
+        not_conv_mask = ncm[0, :]
+        for d in range(1, ncm.shape[0]):
+            not_conv_mask = not_conv_mask | ncm[d, :]
+
+        message = f"{message} After minimization error={err}."
 
     if disp:
-        print(
+        tqdm.write(
             f"Point Iteration finished in {niter:3d} iterations. "
             f"Final error = {err}"
         )
 
-    return ds_traj_posn_next, err, dist, in_domain, not_conv_mask
+    return ds_traj_posn_next, err, dist, ndist, in_domain, not_conv_mask, message
 
 
-def _pt_backtrack_origin_optimize(
+def pt_backtrack_origin_optimize(
     ds_position_scalars,
     ds_traj_posn_org,
     pt_traj_posn_first_guess,
@@ -512,21 +470,11 @@ def _pt_backtrack_origin_optimize(
     if minimize_options is not None:
         options.update(minimize_options)
 
-    grid_spacing = np.array(
-        [
-            [ds_position_scalars["x"].attrs["dx"]],
-            [ds_position_scalars["y"].attrs["dy"]],
-            [ds_position_scalars["z"].attrs["dz"]],
-        ]
-    )
-
-    #    grid_size = np.sqrt(np.mean(grid_spacing * grid_spacing))
-
     def _calc_backtrack_origin_err(pt_traj_posn):
 
         ds_traj_posn = _pt_arr_to_ds(pt_traj_posn)
 
-        dist_arr, in_domain = _calc_backtrack_origin_dist(
+        dist_arr, ndist, in_domain = calc_backtrack_origin_dist(
             ds_position_scalars,
             ds_traj_posn_org,
             ds_traj_posn,
@@ -534,9 +482,8 @@ def _pt_backtrack_origin_optimize(
             interp_order=interp_order,
         )
 
-        ndist = dist_arr / grid_spacing
-        # err = np.linalg.norm(dist_arr.flatten(), ord=2)
-        err = np.linalg.norm(ndist.flatten(), ord=2)
+        fndist = ndist.flatten()
+        err = np.linalg.norm(fndist, ord=2) / np.sqrt(len(fndist))
         return err
 
     # for the minimization we will be using just a numpy-array
@@ -544,6 +491,7 @@ def _pt_backtrack_origin_optimize(
 
     pt_traj_posn_next = pt_traj_posn_first_guess
     niter = 0
+    err_prev = pt_traj_posn_next.size * tol * 100
     while niter < max_outer_loops:
         sol = scipy.optimize.minimize(
             fun=_calc_backtrack_origin_err,
@@ -552,21 +500,23 @@ def _pt_backtrack_origin_optimize(
             options=options,
         )
         pt_traj_posn_next = sol.x
-        print(f"{niter=} {sol.fun=}")
-        if sol.fun / np.sqrt(sol.x.size) <= tol:  # grid_size * tol:
-            break
         niter += 1
+        err_now = sol.fun / np.sqrt(sol.x.size)
+        if err_now <= tol or err_now == err_prev:  # grid_size * tol:
+            break
+        err_prev = err_now
 
     return pt_traj_posn_next
 
 
-def _ds_backtrack_origin_optimize(
+def ds_backtrack_origin_optimize(
     ds_position_scalars,
     ds_traj_posn_org,
     ds_traj_posn_first_guess,
     interpolator,
     minimization_method,
     interp_order=5,
+    opt_one_step=False,
     kwargs=None,
 ):
     """
@@ -576,7 +526,7 @@ def _ds_backtrack_origin_optimize(
     at pt_traj_posn_next equals ds_traj_posn_org, with first guess
     pt_traj_posn_first_guess as a numpy array.
 
-    This is a wrapper for _pt_backtrack_origin_optimize which does the
+    This is a wrapper for pt_backtrack_origin_optimize which does the
     work finding the forward trajectory solutions as a numpy array of
     points. This pulls the array out of am xarray dataset then puts
     the result back in one, finally calculating the residual error.
@@ -595,7 +545,7 @@ def _ds_backtrack_origin_optimize(
     minimization_method : str
         Methods supported by  scipy.optimize.minimize.
     kwargs : dict
-        Keyword arguments sent to  _pt_backtrack_origin_optimize.
+        Keyword arguments sent to  pt_backtrack_origin_optimize.
 
     Returns
     -------
@@ -608,7 +558,7 @@ def _ds_backtrack_origin_optimize(
 
     pt_traj_posn_next = _pt_ds_to_arr(ds_traj_posn_first_guess).flatten()
 
-    pt_traj_posn_next = _pt_backtrack_origin_optimize(
+    pt_traj_posn_next = pt_backtrack_origin_optimize(
         ds_position_scalars,
         ds_traj_posn_org,
         pt_traj_posn_next,
@@ -617,35 +567,64 @@ def _ds_backtrack_origin_optimize(
         **kwargs,
     )
 
-    ds_traj_posn_next = _pt_arr_to_ds(pt_traj_posn_next)
+    ds_traj_posn_next = _pt_arr_to_ds(pt_traj_posn_next, ds=ds_traj_posn_org)
 
-    ds_grid = ds_position_scalars[["x", "y", "z"]]
-
-    if ds_grid.xy_periodic:
-        ds_traj_posn_next = _wrap_coords(ds_traj_posn_next, ds_grid)
-
-    dist, in_domain = _calc_backtrack_origin_dist(
+    dist, ndist, in_domain = calc_backtrack_origin_dist(
         ds_position_scalars,
         ds_traj_posn_org,
         ds_traj_posn_next,
         interpolator=interpolator,
         interp_order=interp_order,
     )
+
     not_conv_mask = np.zeros(ds_traj_posn_org.sizes["trajectory_number"], dtype=bool)
 
-    # ncm = np.abs(ndist) > tol
-    # not_conv_mask = ncm[0, :] | ncm[1, :] | ncm[2, :]
+    err = np.linalg.norm(ndist.flatten(), ord=2)
 
-    return ds_traj_posn_next, dist, in_domain, not_conv_mask
+    message = f"After minimization error={err}."
+
+    return ds_traj_posn_next, dist, ndist, in_domain, not_conv_mask, message
 
 
-def _extrapolate_single_timestep(
+def extrapolate_traj(ds_traj_posn_origin, ds_traj_posn_prev, ds_grid):
+
+    # First guess - extrapolate from last two positions.
+    # given points A and B the vector spanning from A to B is AB = B-A
+    # let C = B + AB, then C = B + B - A = 2B - A
+
+    # print(ds_grid)
+
+    delta = xr.Dataset()
+    for c in "xyz":
+        delta[c] = ds_traj_posn_origin[c] - ds_traj_posn_prev[c]
+
+    match ds_grid.grid_type:
+        case "xy_cyclic":
+            for c in "xy":
+                L = ds_grid[c].attrs[f"L{c}"]
+                delta[c] = delta[c].where(delta[c] < L / 2, delta[c] - L)
+                delta[c] = delta[c].where(delta[c] > -L / 2, delta[c] + L)
+        case "global":
+            Lx = ds_grid["x"].attrs["Lx"]
+            # Ly = ds_grid['y'].attrs['Ly']
+            delta["x"] = delta["x"].where(delta["x"] < Lx / 2, delta["x"] - Lx)
+            delta["x"] = delta["x"].where(delta["x"] > -Lx / 2, delta["x"] + Lx)
+
+    ds_traj_posn_next_est = xr.Dataset()
+    for c in "xyz":
+        ds_traj_posn_next_est[c] = ds_traj_posn_origin[c] + delta[c]
+
+    return ds_traj_posn_next_est
+
+
+def extrapolate_single_timestep(
     ds_position_scalars_origin,
     ds_position_scalars_next,
     ds_traj_posn_prev,
     ds_traj_posn_origin,
     solver="hybrid_fixed_point_iterator",
     interp_order=5,
+    opt_one_step=False,
     vertical_boundary_option=1,
     aux_coords=None,
     point_iter_kwargs=None,
@@ -683,30 +662,17 @@ def _extrapolate_single_timestep(
         point_iter_kwargs = {}
     if minim_kwargs is None:
         minim_kwargs = {}
-    if ds_position_scalars_origin.attrs["xy_periodic"]:
-        cyclic_boundaries = "xy"
-    else:
-        cyclic_boundaries = None
+
+    grid_type = ds_position_scalars_origin.attrs.get("grid_type", "xy_periodic")
 
     ds_grid = ds_position_scalars_origin[["x", "y", "z"]]
 
-    grid_spacing = np.array(
-        [
-            ds_position_scalars_origin["x"].attrs["dx"],
-            ds_position_scalars_origin["y"].attrs["dy"],
-            ds_position_scalars_origin["z"].attrs["dz"],
-        ]
-    )
-
-    if ds_traj_posn_origin["x"].ndim > 0:
-        grid_spacing = grid_spacing[:, np.newaxis]
-
     # Generate interpolator for repeated interpolation of fields during
     # iteration.
-    interpolator = gen_interpolator_3d_fields(
+    interpolator = gen_interpolator_fields(
         ds_position_scalars_next,
         interp_order=interp_order,
-        cyclic_boundaries=cyclic_boundaries,
+        grid_type=grid_type,
     )
 
     # traj_posn_next_est is our estimate of the trajectory positions at
@@ -720,18 +686,8 @@ def _extrapolate_single_timestep(
     # We will use the Eucledian distance (L2-norm) so that we minimize the
     # magnitude of this error
 
-    # First guess - extrapolate from last two positions.
-    # given points A and B the vector spanning from A to B is AB = B-A
-    # let C = B + AB, then C = B + B - A = 2B - A
-
-    ds_traj_posn_next_est = xr.Dataset()
-    for c in "xyz":
-        ds_traj_posn_next_est[c] = 2.0 * ds_traj_posn_origin[c] - ds_traj_posn_prev[c]
-
-    ds_traj_posn_next_est = _confine_traj_bounds(
-        ds_traj_posn_next_est,
-        ds_grid,
-        vertical_boundary_option=vertical_boundary_option,
+    ds_traj_posn_next_est = extrapolate_traj(
+        ds_traj_posn_origin, ds_traj_posn_prev, ds_grid
     )
 
     if "fixed_point_iterator" in solver:
@@ -740,15 +696,18 @@ def _extrapolate_single_timestep(
             ds_traj_posn_next,
             err,
             dist,
+            ndist,
             in_domain,
             not_conv_mask,
-        ) = _backtrack_origin_point_iterate(
+            message,
+        ) = backtrack_origin_point_iterate(
             ds_position_scalars_next,
             ds_traj_posn_origin,
             ds_traj_posn_next_est,
             interpolator,
             solver,
             interp_order=interp_order,
+            opt_one_step=opt_one_step,
             minim_kwargs=minim_kwargs,
             **point_iter_kwargs,
         )
@@ -758,23 +717,27 @@ def _extrapolate_single_timestep(
         (
             ds_traj_posn_next,
             dist,
+            ndist,
             in_domain,
             not_conv_mask,
-        ) = _ds_backtrack_origin_optimize(
+            message,
+        ) = ds_backtrack_origin_optimize(
             ds_position_scalars_next,
             ds_traj_posn_origin,
             ds_traj_posn_next_est,
             interpolator,
             solver,
             interp_order=interp_order,
+            opt_one_step=opt_one_step,
             kwargs=minim_kwargs,
         )
 
-    ds_traj_posn_next = _confine_traj_bounds(
-        ds_traj_posn_next, ds_grid, vertical_boundary_option=vertical_boundary_option
-    )
     for c in "xyz":
         ds_traj_posn_next[c] = ds_traj_posn_next[c].astype("float32")
+
+    ds_traj_posn_next = confine_traj_bounds(
+        ds_traj_posn_next, ds_grid, vertical_boundary_option=vertical_boundary_option
+    )
 
     # Copy in final error measure for each trajectory.
     for i, c in enumerate("xyz"):
@@ -793,7 +756,7 @@ def _extrapolate_single_timestep(
 
     flags[not_conv_mask] |= NOT_CONVERGED
 
-    if not ds_position_scalars_origin.xy_periodic:
+    if ds_position_scalars_origin.grid_type.lower() == "lam":
         x = ds_traj_posn_next["x"].values
         flags[x < ds_position_scalars_origin["x"].values[0]] |= LEFT_W_BOUNDARY
         flags[x > ds_position_scalars_origin["x"].values[-1]] |= LEFT_E_BOUNDARY
@@ -819,11 +782,18 @@ def _extrapolate_single_timestep(
     ds_traj_posn_next = ds_traj_posn_next.assign_coords(time_index=file_index)
 
     if aux_coords is not None:
+        # ds_grid = ds_position_scalars_origin[["x", "y", "z"]]
+
+        # ds_traj_posn_next_conf = confine_traj_bounds(
+        #     ds_traj_posn_next, ds_grid,
+        #     vertical_boundary_option=vertical_boundary_option
+        # )
+
         ds_traj_posn_next = aux_coords_to_traj(
             ds_position_scalars_origin, ds_traj_posn_next, aux_coords, interp_order=1
         )
 
-    return ds_traj_posn_next
+    return ds_traj_posn_next, message
 
 
 def forward(
@@ -833,6 +803,7 @@ def forward(
     interp_order=5,
     solver="fixed_point_iterator",
     vertical_boundary_option=1,
+    opt_one_step=False,
     point_iter_kwargs=None,
     minim_kwargs=None,
     output_path=None,
@@ -855,20 +826,22 @@ def forward(
     residual error. The keyword 'solver' should be set to one of the options
     for this function. The default (recommended) is 'BFGS'.
 
-    See _ds_backtrack_origin_optimize for available options.
+    See ds_backtrack_origin_optimize for available options.
 
     The second uses point iteration. Selected using keyword 'solver' set to
     "fixed_point_iterator". This is generally much faster than
     scipy.optimize.minimize, but some trajectories do not converge.
 
-    See _backtrack_origin_point_iterate for available options.
+    See backtrack_origin_point_iterate for available options.
 
     The third is a combination of the first two, selected using keyword
     'solver' set to 'hybrid_fixed_point_iterator'.
 
-    See _backtrack_origin_point_iterate for available options.
+    See backtrack_origin_point_iterate for available options.
 
     """
+    # print(f'{ds_position_scalars=}')
+
     input_times = list(ds_position_scalars["time"].values)
 
     if ds_back_trajectory.time.count() < 2:
@@ -882,27 +855,35 @@ def forward(
     ds_traj = ds_back_trajectory.copy()
 
     if da_times.size == 0:
-        print("No forward trajectories requested")
+        logger.info("No forward trajectories requested")
         return ds_traj
 
     # step forward in time, `t_forward` represents the time we're of the next
     # point (forward) of the trajectory
-    for t_next in tqdm(da_times, desc="forward"):
+    for t_next in tqdm(
+        da_times,
+        desc="forward",
+        position=0,
+        disable=not is_interactive,
+        dynamic_ncols=is_interactive,
+    ):
 
         ds_traj_posn_origin = ds_traj.isel(time=-1)
 
         t_origin = ds_traj_posn_origin.time
 
         ds_position_scalars_origin = ds_position_scalars.sel(time=t_origin)
+        # print(f'{ds_position_scalars_origin=}')
 
         ds_position_scalars_next = ds_position_scalars.sel(time=t_next)
+        # print(f'{ds_position_scalars_next=}')
 
         # for the original direction estimate we need *previous* position (i.e.
         # where we were before the "origin" point)
         ds_traj_posn_prev = ds_traj.isel(time=-2)
         # ds_traj_posn_prev = ds_traj.isel(time=[-3,-2])
 
-        ds_traj_posn_est = _extrapolate_single_timestep(
+        ds_traj_posn_est, message = extrapolate_single_timestep(
             ds_position_scalars_origin=ds_position_scalars_origin,
             ds_position_scalars_next=ds_position_scalars_next,
             ds_traj_posn_prev=ds_traj_posn_prev,
@@ -910,10 +891,13 @@ def forward(
             interp_order=interp_order,
             solver=solver,
             vertical_boundary_option=vertical_boundary_option,
+            opt_one_step=opt_one_step,
             aux_coords=aux_coords,
             point_iter_kwargs=point_iter_kwargs,
             minim_kwargs=minim_kwargs,
         )
+
+        tqdm.write(message)
 
         if output_path is not None:
             out_fmt = f"0{math.ceil(math.log10(len(input_times)))}"

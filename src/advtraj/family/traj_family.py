@@ -5,9 +5,10 @@ Created on Fri Dec 23 10:29:03 2022
 @author: Peter Clark
 
 """
+
 import math
-import os.path
 import time
+from pathlib import Path
 from typing import List, Tuple, Union
 
 import matplotlib.pyplot as plt
@@ -25,6 +26,7 @@ from cohobj.object_tools import (
     tr_objects_to_numpy,
     unsplit_objects,
 )
+from loguru import logger
 
 from ..integrate import integrate_trajectories
 from ..utils.data_to_traj import data_to_traj
@@ -34,6 +36,7 @@ from ..utils.point_selection import mask_to_positions
 def traj_family(
     source,
     mask,
+    odir,
     output_path_base,
     get_objects=True,
     start_ref_time=None,
@@ -52,9 +55,11 @@ def traj_family(
     source : xr.Dataset
         Gridded input data.
     mask : xr.DataArray
-        Mask defining startign points at each time in source.
+        Mask defining starting points at each time in source.
+    odir : Path
+        Path to output data directory.
     output_path_base : str
-        Generic path for output family - an index nmber will be added.
+        Generic path for output family - an index number will be added.
     get_objects : bool, optional
         Find object ids at each reference time. The default is True.
     start_ref_time : float, optional
@@ -124,11 +129,11 @@ def traj_family(
 
             traj = unsplit_objects(traj, Lx, Ly)
 
-        output_path = output_path_base + nsig.format(i_ref_time)
+        output_path = odir / f"{output_path_base}{nsig.format(i_ref_time)}"
         traj.to_netcdf(output_path)
 
-        print(traj)
-        print(f"Trajectories saved to {output_path}")
+        logger.info(f"Trajectory dataset\n {traj}")
+        logger.info(f"Trajectories saved to {output_path}")
 
         traj.close()
 
@@ -157,7 +162,7 @@ def _get_starting_points(mask, get_objects=True):
     return ds_starting_points, olab
 
 
-def traj_name_to_data_name(traj_file: str, opdir: str = None, append: bool = False):
+def traj_name_to_data_name(traj_file: str, opdir: Path = None, append: bool = False):
     """
     Convert trajectory file name to data file name.
 
@@ -178,15 +183,16 @@ def traj_name_to_data_name(traj_file: str, opdir: str = None, append: bool = Fal
     """
 
     if opdir is None:
-        dir_name = os.path.dirname(traj_file)
+        dir_path = traj_file.parent
     else:
-        dir_name = opdir
+        dir_path = opdir
 
-    file_name = os.path.basename(traj_file)
+    file_name = traj_file.name
+
     if append:
-        data_file_name = dir_name + "/" + file_name.replace(".nc", "_data.nc")
+        data_file_name = dir_path / file_name.replace(".nc", "_data.nc")
     else:
-        data_file_name = dir_name + "/" + file_name.replace("trajectories", "data")
+        data_file_name = dir_path / file_name.replace("trajectories", "data")
 
     return data_file_name
 
@@ -297,10 +303,10 @@ def analyse_traj_family(traj_files: list):
 
 
 def data_to_traj_family(
-    traj_files: list,
+    traj_files: Path,
     source: xr.Dataset,
     varlist: list,
-    odir: str,
+    odir: Path,
     interp_order: int = 5,
     append: bool = False,
 ) -> list:
@@ -315,7 +321,7 @@ def data_to_traj_family(
         Gridded input data.
     varlist : list(str)
         Variable names to interpolate.
-    odir : str
+    odir : Path
         output directory name.
     interp_order : int, optional
         Order of Lagrange interpolation. The default is 5.
@@ -330,10 +336,13 @@ def data_to_traj_family(
         traj_name_to_data_name is used to map one to the other.
     """
     pathlist = []
+
     for traj_file in traj_files:
 
-        file_num = str(traj_file).split(".")[0].split("_")[-1]
-        print(f"Processing file {file_num}")
+        file_num = traj_file.stem.split("_")[-1]
+
+        # file_num = str(traj_file).split(".")[0]
+        logger.info(f"Processing file {file_num}")
         output_path_data = traj_name_to_data_name(traj_file, opdir=odir)
 
         ds_traj = xr.open_dataset(traj_file)
@@ -346,9 +355,11 @@ def data_to_traj_family(
             output_path_data,
             interp_order=interp_order,
         )
-        print(ds_traj_data)
+        logger.info("Created data file\n", ds_traj_data)
 
         pathlist.append(output_path_data)
+
+    return pathlist
 
 
 def family_coords(family, coord_name):
@@ -377,8 +388,9 @@ def find_match_obj_at_time(
     corr_box = box_overlap_with_wrap(b_test, b_set, nx, ny)
 
     if corr_box is None:
-        # print(f"No matching objects master trajectory {iobj=} "
-        #       f"{match_time_back=}")
+        logger.debug(
+            f"No matching objects master trajectory {traj_iobj=} " f"{match_time_back=}"
+        )
         return matching_objects_at_time, all_matching_objects
 
     if matching_objects_at_time is not None:
@@ -386,7 +398,7 @@ def find_match_obj_at_time(
 
     obj_labels = list(corr_box.object_label.values)
 
-    # print(f"Matching object(s): {matching_objects_at_time[match_time_back]}")
+    logger.debug(f"Matching object(s): {matching_objects_at_time[match_time_back]}")
 
     if fast:
         for o in obj_labels:
@@ -485,10 +497,8 @@ def find_matching_objects(
         match_time_back = match_traj_bounds.ref_time.item()
         b_test = traj_box.sel(time=match_time_back)
         if np.isnan(b_test.x_min).item():
-            # print(f"No points in master trajectory {iobj=} "
-            #       f"{match_time_back=}")
             return matching_objects_at_time
-        (dummy, all_matching_objects) = find_match_obj_at_time(
+        dummy, all_matching_objects = find_match_obj_at_time(
             traj_iobj,
             b_test,
             # traj_box,
@@ -525,7 +535,7 @@ def find_matching_objects(
                 #       f"{match_time_back=}")
                 continue
 
-            (matching_objects_at_time, all_matching_objects) = find_match_obj_at_time(
+            matching_objects_at_time, all_matching_objects = find_match_obj_at_time(
                 traj_iobj,
                 b_test,
                 traj_box,
@@ -614,7 +624,7 @@ def find_matching_objects_ref(
 
     master_ref_time = traj.ref_time.item()
 
-    print(f"Reference time: {master_ref_time}")
+    logger.info(f"Reference time: {master_ref_time}")
 
     master_ref_times = traj.get_index("time")
 
@@ -631,7 +641,7 @@ def find_matching_objects_ref(
     # Iterate over objects in master_ref.
     for iobj in select:
 
-        print(f"Object {iobj}")
+        logger.info(f"Object {iobj}")
 
         traj_iobj_bounds = traj_bounds.sel(object_label=iobj)
         if not fast:
@@ -958,9 +968,7 @@ def _graph_matches(G, node, match_time, matches, ntype):
 def graph_matching_objects(
     mol_family: dict,
     include_types: Union[
-        Tuple[
-            int,
-        ],
+        Tuple[int,],
         None,
     ] = None,
 ) -> nx.DiGraph:
@@ -1125,9 +1133,7 @@ def related_objects(
     ref_times_sel: Union[list, None] = None,
     overlap_thresh: Union[float, None] = None,
     ntypes: Union[
-        Tuple[
-            int,
-        ],
+        Tuple[int,],
         None,
     ] = None,
 ) -> list:
@@ -1166,12 +1172,10 @@ def related_objects(
                 continue
             if overlap_thresh is None:
                 r.append(sce)
-                # print(sce)
             else:
                 overlap = G.get_edge_data(sce, dest)["max_overlap"]
                 if overlap is None or overlap >= overlap_thresh:
                     r.append(sce)
-                    # print(sce)
 
     s = nx.dfs_successors(G, obj)
     # s = nx.descendants(G, obj)
@@ -1219,9 +1223,7 @@ def draw_object_graph(
     highlight_nodes: list = None,
     overlap_thresh: float = None,
     ntypes: Union[
-        Tuple[
-            int,
-        ],
+        Tuple[int,],
         None,
     ] = None,
     figsize: Union[Tuple[float, float], None] = None,
@@ -1274,7 +1276,7 @@ def draw_object_graph(
 
     maxy = 0
     for n in G.nodes():
-        (x, y) = n
+        x, y = n
         maxy = max(maxy, y)
         pos[n] = [x, y]
         if x not in times:
@@ -1300,9 +1302,11 @@ def draw_object_graph(
     ]
 
     edgewidth = [
-        G.get_edge_data(u, v)["max_overlap"] * 5 + 1
-        if "max_overlap" in G.edges[u, v].keys()
-        else 1
+        (
+            G.get_edge_data(u, v)["max_overlap"] * 5 + 1
+            if "max_overlap" in G.edges[u, v].keys()
+            else 1
+        )
         for u, v in edgelist
     ]
 

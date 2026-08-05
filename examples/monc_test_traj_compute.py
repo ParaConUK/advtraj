@@ -8,6 +8,8 @@ import os
 import time
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+
 # import numpy as np
 import xarray as xr
 from cohobj.object_tools import get_object_labels, unsplit_objects
@@ -210,15 +212,41 @@ def main(
 
     print(ds_traj)
 
+    fig, ax = plt.subplots(3, 2, sharex=True, figsize=(8, 10))
+    plt.suptitle(f"advtraj {case} {interp_order} {expt} elapsed time = {delta_t:3.0f}")
+    plt.suptitle(f"advtraj {interp_order} elapsed time = {delta_t}")
+    ds_traj["x"].plot.line(x="time", ax=ax[0, 0], add_legend=False)
+    ds_traj["y"].plot.line(x="time", ax=ax[1, 0], add_legend=False)
+    ds_traj["z"].plot.line(x="time", ax=ax[2, 0], add_legend=False)
+    # ax[0,0].set_ylim([0,7000])
+    # ax[1,0].set_ylim([0,7000])
+    # ax[2,0].set_ylim([0,2000])
+    ds_traj["x_err"].plot.line(x="time", ax=ax[0, 1], add_legend=False)
+    ds_traj["y_err"].plot.line(x="time", ax=ax[1, 1], add_legend=False)
+    ds_traj["z_err"].plot.line(x="time", ax=ax[2, 1], add_legend=False)
+
+    # ds_traj["u"].plot.line(x='time', ax = ax[0,2], add_legend=False)
+    # ds_traj["v"].plot.line(x='time', ax = ax[1,2], add_legend=False)
+    # ds_traj["w"].plot.line(x='time', ax = ax[2,2], add_legend=False)
+
+    # traj_data["q_cloud_liquid_mass"].plot.line(x='time', ax = ax[3,0],
+    #                                            add_legend=False)
+    # traj_data["th"].plot.line(x='time', ax = ax[3,1],
+    #                                            add_legend=False)
+    fig.tight_layout()
+    fig.savefig(f"advtraj_{case}_{interp_order}_{expt}.png")
+    plt.show()
+
     ds_traj.close()
 
 
 if __name__ == "__main__":
 
     case = "cloud"
+    # case = "w"
 
-    steps_backward = 30
-    steps_forward = 30
+    steps_backward = 35  # 30
+    steps_forward = 35  # 30
 
     minim = "fixed_point_iterator"
 

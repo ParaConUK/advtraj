@@ -3,6 +3,7 @@
 monc_plot_traj_anim.py
 Plot trajectory animations.
 """
+
 from pathlib import Path
 
 import xarray as xr
@@ -96,7 +97,7 @@ anim = plot_traj_animation(
     galilean=(-8, -1.5),
     plot_mask=False,
     # view_point=(30,30),
-    anim_name="Traj_plot_cloud_class.gif",
+    # anim_name="Traj_plot_cloud_class.gif",
     load_ds=True,
     figsize=(15, 12),
     legend=True,

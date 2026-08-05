@@ -2,19 +2,23 @@
 Functionality for computing trajectories backward from a set of starting points
 at a single point in time using the position scalars.
 """
+
 import math
+import sys
 
 import numpy as np
 import xarray as xr
 from tqdm import tqdm
 
 from ..utils.data_to_traj import aux_coords_to_traj
+from ..utils.grid import confine_traj_bounds
 from ..utils.grid_mapping import (
     estimate_3d_position_from_grid_indices,
     estimate_initial_grid_indices,
 )
-from ..utils.interpolation import interpolate_3d_fields
+from ..utils.interpolation import interpolate_fields
 from ..utils.io import ds_save
+from ..utils.xarray_utils import ds_force_dim_order
 
 ENTERED_W_BOUNDARY = 2**1
 ENTERED_E_BOUNDARY = 2**2
@@ -24,6 +28,8 @@ ENTERED_N_BOUNDARY = 2**4
 ENTERED = (
     ENTERED_W_BOUNDARY | ENTERED_E_BOUNDARY | ENTERED_S_BOUNDARY | ENTERED_N_BOUNDARY
 )
+
+is_interactive = sys.stdout.isatty()
 
 
 def calc_trajectory_previous_position(
@@ -43,12 +49,22 @@ def calc_trajectory_previous_position(
     # interpolate the position scalar values at the current trajectory
     # position
 
-    ds_initial_position_scalar_locs = interpolate_3d_fields(
+    grid_type = ds_position_scalars.attrs["grid_type"]
+
+    ds_grid = ds_position_scalars[["x", "y", "z"]]
+
+    ds_traj_posn_confined = confine_traj_bounds(
+        ds_traj_posn,
+        ds_grid,
+        vertical_boundary_option=1,
+    )
+
+    ds_initial_position_scalar_locs = interpolate_fields(
         ds=ds_position_scalars,
-        ds_positions=ds_traj_posn,
+        ds_positions=ds_traj_posn_confined,
         interpolator=interpolator,
         interp_order=interp_order,
-        cyclic_boundaries="xy" if ds_position_scalars.xy_periodic else None,
+        grid_type=grid_type,
     )
 
     # convert these position scalar values to grid positions so we can estimate
@@ -58,6 +74,8 @@ def calc_trajectory_previous_position(
         ds_position_scalars=ds_initial_position_scalar_locs,
         N_grid=ds_position_scalars.sizes,
     )
+
+    # print(f'{ds_traj_init_grid_idxs=}')
 
     # interpolate these grid-positions from the position scalars so that we can
     # get an actual xyz-position
@@ -76,6 +94,7 @@ def backward(
     ds_starting_point,
     da_times,
     interp_order=5,
+    vertical_boundary_option=1,
     output_path=None,
     aux_coords: list = None,
 ):
@@ -100,8 +119,13 @@ def backward(
         ds_starting_point = ds_starting_point.drop_vars(["forecast_period"])
 
     if aux_coords is not None:
+
+        ds_pos = ds_force_dim_order(
+            ds_position_scalars.sel(time=ref_time), req_order="xyz"
+        )
+
         ds_starting_point = aux_coords_to_traj(
-            ds_position_scalars.sel(time=ref_time),
+            ds_pos,
             ds_starting_point,
             aux_coords,
             interp_order=1,
@@ -118,7 +142,15 @@ def backward(
     # step back in time, `t_current` represents the time we're of the next
     # point (backwards) of the trajectory
     # start at 1 because this provides position for previous time.
-    for t_current in tqdm(da_times.values[::-1], desc="backward"):
+
+    times = da_times.values
+    time_index = len(times) - 1
+    for t_current in tqdm(
+        times[::-1],
+        desc="backward",
+        disable=not is_interactive,
+        dynamic_ncols=is_interactive,
+    ):
 
         ds_traj_posn_origin = datasets[-1].drop_vars("time")
 
@@ -126,22 +158,28 @@ def backward(
             "time"
         )
 
-        ds_traj_posn_est = calc_trajectory_previous_position(
+        ds_position_scalars_current = ds_force_dim_order(
+            ds_position_scalars_current, req_order="xyz"
+        )
+
+        ds_traj_posn_prev = calc_trajectory_previous_position(
             ds_position_scalars=ds_position_scalars_current,
             ds_traj_posn=ds_traj_posn_origin,
             interp_order=interp_order,
         )
         # find the previous time so that we can construct a new dataset to contain
         # the trajectory position at the previous time
-        time_to_now = ds_position_scalars.time.sel(time=slice(None, t_current))
+        # time_to_now = ds_position_scalars.time.sel(time=slice(None, t_current))
         try:
-            if time_to_now.size > 1:
-                t_previous = time_to_now.isel(time=-2)
+            if time_index > 0:
+                t_previous = times[time_index - 1]
+                delta_time = t_current - t_previous
+
+            elif time_index == 0:
+                t_previous = t_current - delta_time
             else:
-                if "forecast_reference_time" in ds_position_scalars.coords:
-                    t_previous = ds_position_scalars.coords["forecast_reference_time"]
-                else:
-                    t_previous = time_to_now - (t_current - time_to_now)
+                raise ValueError("Cannot find t_previous.")
+
         except IndexError:
             # this will happen if we're trying to integrate backwards from the
             # very first timestep, which we can't (and shouldn't). Just check
@@ -151,10 +189,21 @@ def backward(
             else:
                 raise
 
-        ds_traj_posn_prev = ds_traj_posn_est.assign_coords({"time": t_previous.values})
+        ds_traj_posn_prev = ds_traj_posn_prev.assign_coords({"time": t_previous})
 
         if "forecast_period" in ds_traj_posn_prev.coords:
             ds_traj_posn_prev = ds_traj_posn_prev.drop_vars(["forecast_period"])
+
+        ds_grid = ds_position_scalars_current[["x", "y", "z"]]
+
+        ds_traj_posn_prev = confine_traj_bounds(
+            ds_traj_posn_prev,
+            ds_grid,
+            vertical_boundary_option=vertical_boundary_option,
+        )
+
+        for c in "xyz":
+            ds_traj_posn_prev[c] = ds_traj_posn_prev[c].astype("float32")
 
         # Error in back trajectory is not quantifiable. Set to NaN.
         for c in "xyz":
@@ -164,7 +213,7 @@ def backward(
 
         flags = datasets[-1].flag.values & ENTERED
 
-        if not ds_position_scalars.xy_periodic:
+        if ds_position_scalars.grid_type.lower() == "lam":
             x = ds_traj_posn_prev["x"].values
             flags[x < ds_position_scalars["x"].values[0]] |= ENTERED_W_BOUNDARY
             flags[x > ds_position_scalars["x"].values[-1]] |= ENTERED_E_BOUNDARY
@@ -181,6 +230,7 @@ def backward(
         ds_traj_posn_prev = ds_traj_posn_prev.assign_coords(time_index=file_index)
 
         if aux_coords is not None:
+
             ds_traj_posn_prev = aux_coords_to_traj(
                 ds_position_scalars_current,
                 ds_traj_posn_prev,
@@ -193,6 +243,8 @@ def backward(
         file_index -= 1
 
         datasets.append(ds_traj_posn_prev)
+
+        time_index -= 1
 
     ds_traj = xr.concat(datasets[::-1], dim="time")
 

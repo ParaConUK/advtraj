@@ -98,7 +98,9 @@ def create_uniform_grid(dL, L, grid_style="cell_centred"):
     ds.x.attrs["long_name"] = "x-horz. posn."
     ds.y.attrs["long_name"] = "y-horz. posn."
     ds.z.attrs["long_name"] = "height"
+    ds.attrs["grid_type"] = "xy_periodic"
 
+    print(f"create_uniform_grid: {ds=}")
     return ds
 
 
@@ -110,7 +112,7 @@ def create_initial_dataset(dL, L, xy_periodic=True):
     dx, dy, dz = dL
     ds_grid = create_uniform_grid(dL=dL, L=L)
 
-    ds_grid.attrs["xy_periodic"] = xy_periodic
+    ds_grid.attrs["grid_type"] = "xy_periodic"
 
     ds = init_position_scalars(ds=ds_grid)
     ds = ds.assign_coords(time=np.datetime64("2020-01-01T00:00"))
@@ -144,6 +146,6 @@ def init_position_scalars(ds):
     #   ds["y_err"] = xr.zeros_like(ds["y"])
     #   ds["z_err"] = xr.zeros_like(ds["z"])
 
-    ds.attrs["xy_periodic"] = True
+    ds.attrs["grid_type"] = "xy_periodic"
 
     return ds
