@@ -223,7 +223,7 @@ def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
         ds_indices["j"] = j_
         ds_indices["k"] = k_
 
-    xy_periodic = ds_grid.xy_periodic
+    grid_type = ds_grid.grid_type
 
     ds_position_scalars = grid_indices_to_position_scalars(
         i=ds_indices.i,
@@ -232,7 +232,7 @@ def grid_locations_to_position_scalars(ds_grid, ds_pts=None):
         nx=nx,
         ny=ny,
         nz=nz,
-        xy_periodic=xy_periodic,
+        grid_type=grid_type,
     )
 
     return ds_position_scalars
