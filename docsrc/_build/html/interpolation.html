@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>The interpolation module &#8212; advtraj 0.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The interpolation module</a></li>
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+
+  <section id="the-interpolation-module">
+<h1>The interpolation module<a class="headerlink" href="#the-interpolation-module" title="Permalink to this heading">¶</a></h1>
+<p>This module contains tools used to interpolate fields onto points. There are largely wrappers for <code class="xref py py-mod docutils literal notranslate"><span class="pre">fast_interp</span></code>.</p>
+<section id="detailed-module-contents">
+<h2>Detailed Module Contents<a class="headerlink" href="#detailed-module-contents" title="Permalink to this heading">¶</a></h2>
+<p>The entire module is documented below.</p>
+<span class="target" id="module-advtraj.utils.interpolation"></span><p>Routines for interpolating 3D scalar fields to arbitrary positions in domains
+with (optional) cyclic boundary conditions</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.interpolate_1d_field">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">interpolate_1d_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.interpolate_1d_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.map_1d_grid_index_to_position">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">map_1d_grid_index_to_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">da_coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.map_1d_grid_index_to_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map indices <cite>idx_grid</cite> to the positions in grid defined by the
+cell-centered positions in <cite>da_coord</cite>.</p>
+<p>We assume that the grid-indices map to the cell-center positions, so
+that for a grid resolution <cite>dx=25.0m</cite> and a grid with two cells with
+a domain of length 50.0 we have the following:</p>
+<blockquote>
+<div><p>i:             0           1
+x:      0.0  12.5  25.0  23.5  50.0</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">x     |     x     |</div>
+</div>
+</div></blockquote>
+</div></blockquote>
+<p>i_est:     -0.5    0    0.5    1    1.5</p>
+<p>We need to allow for the estimated grid indices <cite>i_est</cite> to map to grid
+positions up to the domain edges, which is outside of the cell-center
+positions. This is done by making the interpolation extend linearly outside
+the value range (by one index at either end)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.interpolate_field">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">interpolate_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.interpolate_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform interpolation of xr.DataArray <cite>da</cite> at positions given by data
+variables in <cite>ds_positions</cite> with interpolation order <cite>interp_order</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.interpolate_from_interpolator">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">interpolate_from_interpolator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.interpolate_from_interpolator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform interpolation of variable named ‘v’ at positions given by data
+variables in <cite>ds_positions</cite> using interpolator fn.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.interpolate_fields">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">interpolate_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_positions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.interpolate_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform interpolation of xr.DataSet <cite>ds</cite> at positions given by data
+variables in <cite>ds_positions</cite>.</p>
+<p>If interpolator provided, look in this for pre-generated fast_inter
+interpolator for each variable.
+Otherwise, interpolate with interpolation order <cite>interp_order</cite>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.match_dims">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">match_dims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vals</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.match_dims" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.gen_interpolator_for_field">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">gen_interpolator_for_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.gen_interpolator_for_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate fast_interp interpolator for xr.DataArray <cite>da</cite> at positions with
+interpolation order <cite>interp_order</cite>.</p>
+<p>grid_type can be one of ‘lam’, ‘xy_periodic’ or ‘global’</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.gen_interpolator_fields">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">gen_interpolator_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#advtraj.utils.interpolation.gen_interpolator_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate fast_interp interpolators for xr.DataSet <cite>ds</cite> at positions with
+interpolation order <cite>interp_order</cite>.</p>
+<p>Cyclic boundary conditions are used by providing a <cite>list</cite> of the
+coordinates which have cyclic boundaries,
+e.g. (<cite>cyclic_boundaries = ‘xy’</cite> or <cite>cyclic_boundaries = [‘x’, ‘y’]</cite>)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.interpolation.interp_gen_field">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.interpolation.</span></span><span class="sig-name descname"><span class="pre">interp_gen_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.interpolation.interp_gen_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">The interpolation module</a><ul>
+<li><a class="reference internal" href="#detailed-module-contents">Detailed Module Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/interpolation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The interpolation module</a></li>
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019-2026 Peter Clark.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

@@ -119,6 +119,21 @@ def _set_coord_attrs(ds):
 
 
 def set_data_precision(ds, precision=np.float32):
+    """
+    Set data precision for xarray Dataset
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+    precision : numpy data type. Optional.
+        DESCRIPTION. The default is np.float32.
+
+    Returns
+    -------
+    Modified xarray.Dataset
+
+    """
+
     for var in ds.data_vars:
         da = ds[var]
         ds[var] = da.astype(precision)
@@ -142,8 +157,39 @@ def integrate_trajectories(
     """
     Integrate trajectories forwards and back.
 
-    Using "position scalars" `ds_position_scalars` integrate trajectories from
-    starting points in `ds_starting_points` to times as in `times`
+    Parameters
+    ----------
+    ds_position_scalars: xarray.Dataset
+        Must contain DataArrays with appropriate Lagrangian labels.
+    ds_starting_points:  xarray.Dataset
+        Initial DataArrays names `x`, `y` and `z` with dimension `trajectory_number`.
+        Must also have `time` attribute matching a `time` in `ds_position_scalars`
+    steps_backward: Integer, optional.
+        Number of timesteps in backward trajectory. Default=None means use all available times in `ds_position_scalars`.
+    steps_forward: Integer, optional.
+        Number of timesteps in forward trajectory. Default=None means use all available times in `ds_position_scalars`.
+    interp_order: Integer, optional
+        Interpolation order for input labels fields. Default=5.
+    forward_solver: str, optional
+        Solver method "fixed_point_iterator" (default) or "hybrid_fixed_point_iterator"
+    vertical_boundary_option: Integer, optional
+        Method used to deal with fixed boundaries (1: default, do nothing, 2: randomly perturb in vertical.)
+    opt_one_step: bool, optional.
+        False (default) to optimise each trajectory separately.
+    output_path: Path | str | None
+        Path for individual output files at each timestep. Default=None means no output.
+    aux_coords: list(str) | None, optional.
+        List of coordinate names in `ds` to interpolatee to output trajectory.
+    point_iter_kwargs : dict | None, optional.
+        Dictionary of options for point iteration
+    minim_kwargs: dict | None, optional.
+        Dictionary of options for optimisation
+
+    Returns
+    -------
+    ds: xarray Dataset
+        Resulting trajectories
+
     """
 
     if "fixed_point_iterator" not in forward_solver:

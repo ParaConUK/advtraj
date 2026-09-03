@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>The data_to_traj module &#8212; advtraj 0.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The data_to_traj module</a></li>
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+
+  <section id="the-data-to-traj-module">
+<h1>The data_to_traj module<a class="headerlink" href="#the-data-to-traj-module" title="Permalink to this heading">¶</a></h1>
+<p>This modlue contains tools used to interpolate fields onto trajectories.</p>
+<section id="detailed-module-contents">
+<h2>Detailed Module Contents<a class="headerlink" href="#detailed-module-contents" title="Permalink to this heading">¶</a></h2>
+<p>The entire module is documented below.</p>
+<span class="target" id="module-advtraj.utils.data_to_traj"></span><p>Interpolate selected variables from input gridded dataset to trajectories.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.data_to_traj.rename_traj_coords">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.data_to_traj.</span></span><span class="sig-name descname"><span class="pre">rename_traj_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.data_to_traj.rename_traj_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.data_to_traj.data_to_traj">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.data_to_traj.</span></span><span class="sig-name descname"><span class="pre">data_to_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'float32'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_sleeptime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">{}</span></span></span><a class="headerlink" href="#advtraj.utils.data_to_traj.data_to_traj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate 3D variables to trajectory points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_dataset</strong> (<em>xr.Dataset</em>) – Input variables on 3D grid at times matching trajectory times.</p></li>
+<li><p><strong>ds_traj</strong> (<em>xr.Dataset</em>) – Trajectory positions, ‘x’, ‘y’ and ‘z’.</p></li>
+<li><p><strong>varlist</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of strings with variable names required from source_dataset.</p></li>
+<li><p><strong>output_path</strong> (<em>str</em>) – Path to save output NetCDF file.</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of polynomial interpolation. The default is 5.</p></li>
+<li><p><strong>output_precision</strong> (<em>str</em><em>, </em><em>optional</em>) – Data type for output. The default is “float32”.</p></li>
+<li><p><strong>write_sleeptime</strong> (<em>int</em><em>, </em><em>optional</em>) – Pause after write. The default is 3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>‘file’: output_path.
+‘ds’  : output xarray Dataset.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.data_to_traj.find_aux_coord_in_dataset">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.data_to_traj.</span></span><span class="sig-name descname"><span class="pre">find_aux_coord_in_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_coord</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.data_to_traj.find_aux_coord_in_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.data_to_traj.aux_coords_to_traj">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.data_to_traj.</span></span><span class="sig-name descname"><span class="pre">aux_coords_to_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'float32'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="headerlink" href="#advtraj.utils.data_to_traj.aux_coords_to_traj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate auxiliary coordinates to trajectory points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_dataset</strong> (<em>xr.Dataset</em>) – Input variables on 3D grid at times matching trajectory times.</p></li>
+<li><p><strong>ds_traj</strong> (<em>xr.Dataset</em>) – Trajectory positions, ‘x’, ‘y’ and ‘z’.</p></li>
+<li><p><strong>aux_coords</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – List of strings with variable names required from source_dataset.</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of polynomial interpolation. The default is 5.</p></li>
+<li><p><strong>output_precision</strong> (<em>str</em><em>, </em><em>optional</em>) – Data type for output. The default is “float32”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ds_traj</strong> – Trajectory positions, ‘x’, ‘y’ and ‘z’ with additional coords.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xr.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">The data_to_traj module</a><ul>
+<li><a class="reference internal" href="#detailed-module-contents">Detailed Module Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/data_to_traj.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The data_to_traj module</a></li>
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019-2026 Peter Clark.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>
