@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>The integrate sub-package. &#8212; advtraj 0.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The family sub-package." href="family.html" />
+    <link rel="prev" title="Introduction" href="intro.html" />
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="family.html" title="The family sub-package."
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The integrate sub-package.</a></li>
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+
+  <section id="the-integrate-sub-package">
+<h1>The integrate sub-package.<a class="headerlink" href="#the-integrate-sub-package" title="Permalink to this heading">¶</a></h1>
+<p>This package contains the main trajectory computation modules.</p>
+<aside class="topic">
+<p class="topic-title">New at 0.6.0</p>
+<ol class="arabic simple">
+<li><p>The ability to post-process data from the global UM.</p>
+<ul class="simple">
+<li><p>This uses four label fields - <code class="docutils literal notranslate"><span class="pre">xr</span></code>, <code class="docutils literal notranslate"><span class="pre">xi</span></code>, <code class="docutils literal notranslate"><span class="pre">yr</span></code> and <code class="docutils literal notranslate"><span class="pre">zr</span></code>.</p></li>
+<li><p>Versions of <code class="xref py py-mod docutils literal notranslate"><span class="pre">monc_utils</span></code> from at least 0.5.2 are recommended for this application.</p></li>
+</ul>
+</li>
+</ol>
+</aside>
+<section id="detailed-module-contents">
+<h2>Detailed Module Contents<a class="headerlink" href="#detailed-module-contents" title="Permalink to this heading">¶</a></h2>
+<p>The entire sub-package is documented below.</p>
+<span class="target" id="module-advtraj.integrate.backward"></span><p>Functionality for computing trajectories backward from a set of starting points
+at a single point in time using the position scalars.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.backward.calc_trajectory_previous_position">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.backward.</span></span><span class="sig-name descname"><span class="pre">calc_trajectory_previous_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.backward.calc_trajectory_previous_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The algorithm is as follows:</p>
+<p>1) for a trajectory position <cite>(x,y,z)</cite> at a time <cite>t</cite> interpolate the
+“position scalars” to find their value at <cite>(x,y,z,t)</cite>
+2) estimate the initial indices that the fluid at <cite>(x,y,z,t)</cite> came from by
+converting the “position scalars” back to position</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.backward.backward">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.backward.</span></span><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_starting_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">da_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_boundary_option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_coords</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.backward.backward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the position scalars <cite>ds_position_scalars</cite> integrate backwards from
+<cite>ds_starting_point</cite> to the times in <cite>da_times</cite></p>
+</dd></dl>
+
+<span class="target" id="module-advtraj.integrate.forward"></span><p>Calculations for forward trajectory from a point in space and time using the
+position scalars.
+forward</p>
+<blockquote>
+<div><dl>
+<dt>extrapolate_single_timestep</dt><dd><p>gen_interpolator_fields
+–extrapolate first guess
+confine_traj_bounds</p>
+<blockquote>
+<div><p>regularize_coords</p>
+</div></blockquote>
+<p>– if fixed_point_iteration
+backtrack_origin_point_iterate</p>
+<blockquote>
+<div><dl>
+<dt>get_error_norm</dt><dd><p>calc_backtrack_origin_dist</p>
+</dd>
+<dt>pt_backtrack_origin_optimize</dt><dd><blockquote>
+<div><dl class="simple">
+<dt>calc_backtrack_origin_err</dt><dd><dl class="simple">
+<dt>calc_backtrack_origin_dist</dt><dd><p>regularize_coords</p>
+</dd>
+</dl>
+</dd>
+<dt>get_error_norm</dt><dd><p>calc_backtrack_origin_dist</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>regularize_coords</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>– if optimize
+ds_backtrack_origin_optimize</p>
+<blockquote>
+<div><p>_pt_ds_to_arr
+pt_backtrack_origin_optimize</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>calc_backtrack_origin_err</dt><dd><dl class="simple">
+<dt>calc_backtrack_origin_dist</dt><dd><p>wrap_coords</p>
+</dd>
+</dl>
+</dd>
+<dt>get_error_norm</dt><dd><p>calc_backtrack_origin_dist</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>wrap_coords</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>confine_traj_bounds</dt><dd><p>regularize_coords</p>
+</dd>
+</dl>
+<p>– set flags
+aux_coords_to_traj</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.calc_backtrack_origin_dist">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">calc_backtrack_origin_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_org</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.calc_backtrack_origin_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the distance between the true origin and the estimated origin
+(calculated by back-trajectory from <cite>pt_traj_posn_next</cite>)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.get_error_norm">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">get_error_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_org</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos_est</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_abs_error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.get_error_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.backtrack_origin_point_iterate">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">backtrack_origin_point_iterate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_org</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_first_guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_one_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">miniter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relax_reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max_abs_error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_outer_loops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minim_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.backtrack_origin_point_iterate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the forward trajectory solutions as an Xarray DataSet.</p>
+<p>The solution is found when the the origin of air arriving
+at pt_traj_posn_next equals ds_traj_posn_org, with first guess
+pt_traj_posn_first_guess as a numpy array.</p>
+<p>This uses point iteration;
+optionally (solver=’hybrid_hybrid_fixed_point_iterator’) uses
+_pt_backtrack_origin_optimize to find solution for points that do not
+converge in the allowed iterations. Note that the optimizer often uses
+many hundreds of error evaluations, so it is worth letting the point
+iteration have lots of iterations before resorting to it.</p>
+<dl class="simple">
+<dt>Point iteration can be defined as:</dt><dd><p>x(n+1) = x(n) + relax * error(n)</p>
+</dd>
+</dl>
+<p>where error(n) is the distance between the required origin of the air and
+the origin at x(n).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_position_scalars</strong> (<em>Xarray DataSet</em>) – 3D fields of trajectory tracer data.</p></li>
+<li><p><strong>ds_traj_posn_org</strong> (<em>Xarray DataSet</em>) – Current trajectory positions.</p></li>
+<li><p><strong>ds_traj_posn_first_guess</strong> (<em>Xarray DataSet</em>) – First guess of trajectory endpoints.</p></li>
+<li><p><strong>interpolator</strong> (<em>fast interp interpolator.</em>) – Pre-calculated interpolator for fields in ds_position_scalars.
+If None, interpolator is calculated on each call to the interpolation.</p></li>
+<li><p><strong>solver</strong> (<em>str</em>) – “fixed_point_iterator” or “hybrid_fixed_point_iterator”.</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Interpolation order. The default is 5.</p></li>
+<li><p><strong>(</strong><strong>int</strong><strong>)</strong> (<em>max_outer_loops</em>) – </p></li>
+<li><p><strong>(</strong><strong>int</strong><strong>)</strong> – relax. Default=10.</p></li>
+<li><p><strong>(</strong><strong>float</strong><strong>)</strong> (<em>tol</em>) – </p></li>
+<li><p><strong>(</strong><strong>float</strong><strong>)</strong> – iterations. Default=0.9.</p></li>
+<li><p><strong>(</strong><strong>float</strong><strong>)</strong> – convergence. Default=0.01.</p></li>
+<li><p><strong>(</strong><strong>bool</strong><strong>)</strong> (<em>disp</em>) – all trajectories. Default=False.</p></li>
+<li><p><strong>(</strong><strong>bool</strong><strong>)</strong> – Default=False.</p></li>
+<li><p><strong>(</strong><strong>str</strong><strong>)</strong> (<em>norm</em>) – ‘mean_abs_error’, ‘max_abs_error’
+or RMS distance. Default=’max_abs_error’</p></li>
+<li><p><strong>(</strong><strong>int</strong><strong>)</strong> – </p></li>
+<li><p><strong>(</strong><strong>dict</strong><strong>)</strong> (<em>minim_kwargs</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New trajectory position and residual error vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Xarray DataSet, numpy array [3, n]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.pt_backtrack_origin_optimize">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">pt_backtrack_origin_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_org</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt_traj_posn_first_guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'BFGS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_outer_loops</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimize_options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.pt_backtrack_origin_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the forward trajectory solutions as a numpy array of points.</p>
+<p>The solution is found when the the origin of air arriving
+at pt_traj_posn_next equals ds_traj_posn_org, with first guess
+pt_traj_posn_first_guess as a numpy array.</p>
+<p>The minimizer scipy.optimize.minimize is called max_outer_loops times,
+with the previous best solution as the first guess, because, when they
+work, the optimization routines have been found to iterate to
+machine precision, which is much higher than practically needed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_position_scalars</strong> (<em>Xarray DataSet</em>) – 3D fields of trajectory tracer data.</p></li>
+<li><p><strong>ds_traj_posn_org</strong> (<em>Xarray DataSet</em>) – Current trajectory positions.</p></li>
+<li><p><strong>pt_traj_posn_first_guess</strong> (<em>numpy array</em><em>[</em><em>3</em><em>, </em><em>n</em><em>]</em>) – First guess of trajectory endpoints.</p></li>
+<li><p><strong>interpolator</strong> (<em>fast interp interpolator.</em>) – Pre-calculated interpolator for fields in ds_position_scalars.
+If None, interpolator is calculated on each call to the interpolation.</p></li>
+<li><p><strong>minimizer</strong> (<em>str</em><em>, </em><em>optional</em>) – Methods supported by  scipy.optimize.minimize.</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Interpolation order. The default is 5.</p></li>
+<li><p><strong>(</strong><strong>int</strong><strong>)</strong> (<em>max_outer_loops</em>) – </p></li>
+<li><p><strong>(</strong><strong>float</strong><strong>)</strong> (<em>tol</em>) – convergence of outer loops. Default=0.01.</p></li>
+<li><p><strong>minimize_options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Options sent to scipy.optimize.minimize.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New trajectory position..</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy array[3 * n]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.ds_backtrack_origin_optimize">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">ds_backtrack_origin_optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_org</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_first_guess</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimization_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_one_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.ds_backtrack_origin_optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the forward trajectory solutions as an Xarray DataSet.</p>
+<p>The solution is found when the the origin of air arriving
+at pt_traj_posn_next equals ds_traj_posn_org, with first guess
+pt_traj_posn_first_guess as a numpy array.</p>
+<p>This is a wrapper for pt_backtrack_origin_optimize which does the
+work finding the forward trajectory solutions as a numpy array of
+points. This pulls the array out of am xarray dataset then puts
+the result back in one, finally calculating the residual error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_position_scalars</strong> (<em>Xarray DataSet</em>) – 3D fields of trajectory tracer data.</p></li>
+<li><p><strong>ds_traj_posn_org</strong> (<em>Xarray DataSet</em>) – Current trajectory positions.</p></li>
+<li><p><strong>ds_traj_posn_first_guess</strong> (<em>Xarray DataSet</em>) – First guess of trajectory endpoints.</p></li>
+<li><p><strong>interpolator</strong> (<em>fast interp interpolator.</em>) – If None, interpolator is calculated on each call to the interpolation.
+Pre-calculated interpolator for fields in ds_position_scalars.</p></li>
+<li><p><strong>minimization_method</strong> (<em>str</em>) – Methods supported by  scipy.optimize.minimize.</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – Keyword arguments sent to  pt_backtrack_origin_optimize.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New trajectory position and residual error vector.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Xarray DataSet, numpy array [3, n]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.extrapolate_traj">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">extrapolate_traj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_prev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.extrapolate_traj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.extrapolate_single_timestep">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">extrapolate_single_timestep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars_origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_position_scalars_next</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_prev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_traj_posn_origin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hybrid_fixed_point_iterator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_one_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_boundary_option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_iter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minim_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.extrapolate_single_timestep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate from the trajectory position <cite>ds_traj_posn_origin</cite> to the next time.</p>
+<p>The algorithm is as follows:</p>
+<p>1) for a trajectory position <cite>(x,y,z)</cite> at a time <cite>t</cite> extrapolate a first
+guess for the next trajecotory position using the previous point in the
+trajectory
+2) find an optimal value for the estimated next trajectory point by
+minimizing the difference between the true origin and the point found when
+back-tracking from the current “next”-point estimate (using the position
+scalars)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_position_scalars_origin</strong> (<em>xarray DataArray</em>) – 3D gridded data at current time.</p></li>
+<li><p><strong>ds_position_scalars_next</strong> (<em>xarray DataArray</em>) – 3D gridded data at current time.</p></li>
+<li><p><strong>ds_traj_posn_prev</strong> (<em>xarray DataArray</em>) – Trajectory positions at previous time step.</p></li>
+<li><p><strong>ds_traj_posn_origin</strong> (<em>xarray DataArray</em>) – Trajectory positions at current time step.</p></li>
+<li><p><strong>solver</strong> (<em>Optional</em><em> (</em><em>default='hybrid_fixed_point_iterator'</em><em>)</em><em>.</em>) – Method used by scipy.optimize.minimize</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em>) – Order of interpolation from grid to trajectory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.forward.forward">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.forward.</span></span><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_back_trajectory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">da_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed_point_iterator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_boundary_option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_one_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_iter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minim_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.forward.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate trajectory forward one timestep.</p>
+<p>Using the position scalars <cite>ds_position_scalars</cite> integrate forwards from
+the last point in <cite>ds_back_trajectory</cite> to the times in <cite>da_times</cite>. The
+backward trajectory must contain at least two points in time as these are
+used for the initial guess for the forward extrapolation.</p>
+<p>The output dataset contains both the trajectory position and the
+residual error.</p>
+<p>Three solvers are available.</p>
+<p>The first uses the minimizer scipy.optimize.minimize to minimise the
+residual error. The keyword ‘solver’ should be set to one of the options
+for this function. The default (recommended) is ‘BFGS’.</p>
+<p>See ds_backtrack_origin_optimize for available options.</p>
+<p>The second uses point iteration. Selected using keyword ‘solver’ set to
+“fixed_point_iterator”. This is generally much faster than
+scipy.optimize.minimize, but some trajectories do not converge.</p>
+<p>See backtrack_origin_point_iterate for available options.</p>
+<p>The third is a combination of the first two, selected using keyword
+‘solver’ set to ‘hybrid_fixed_point_iterator’.</p>
+<p>See backtrack_origin_point_iterate for available options.</p>
+</dd></dl>
+
+<span class="target" id="module-advtraj.integrate"></span><p>Main routines for integration</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.set_data_precision">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.</span></span><span class="sig-name descname"><span class="pre">set_data_precision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.set_data_precision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set data precision for xarray Dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<em>xarray.Dataset</em>) – </p></li>
+<li><p><strong>precision</strong> (<em>numpy data type. Optional.</em>) – DESCRIPTION. The default is np.float32.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Modified xarray.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.integrate.integrate_trajectories">
+<span class="sig-prename descclassname"><span class="pre">advtraj.integrate.</span></span><span class="sig-name descname"><span class="pre">integrate_trajectories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_position_scalars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_starting_points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_backward</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_forward</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed_point_iterator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_boundary_option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt_one_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aux_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_iter_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minim_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.integrate.integrate_trajectories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate trajectories forwards and back.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_position_scalars</strong> (<em>xarray.Dataset</em>) – Must contain DataArrays with appropriate Lagrangian labels.</p></li>
+<li><p><strong>ds_starting_points</strong> (<em>xarray.Dataset</em>) – Initial DataArrays names <cite>x</cite>, <cite>y</cite> and <cite>z</cite> with dimension <cite>trajectory_number</cite>.
+Must also have <cite>time</cite> attribute matching a <cite>time</cite> in <cite>ds_position_scalars</cite></p></li>
+<li><p><strong>steps_backward</strong> (<em>Integer</em><em>, </em><em>optional.</em>) – Number of timesteps in backward trajectory. Default=None means use all available times in <cite>ds_position_scalars</cite>.</p></li>
+<li><p><strong>steps_forward</strong> (<em>Integer</em><em>, </em><em>optional.</em>) – Number of timesteps in forward trajectory. Default=None means use all available times in <cite>ds_position_scalars</cite>.</p></li>
+<li><p><strong>interp_order</strong> (<em>Integer</em><em>, </em><em>optional</em>) – Interpolation order for input labels fields. Default=5.</p></li>
+<li><p><strong>forward_solver</strong> (<em>str</em><em>, </em><em>optional</em>) – Solver method “fixed_point_iterator” (default) or “hybrid_fixed_point_iterator”</p></li>
+<li><p><strong>vertical_boundary_option</strong> (<em>Integer</em><em>, </em><em>optional</em>) – Method used to deal with fixed boundaries (1: default, do nothing, 2: randomly perturb in vertical.)</p></li>
+<li><p><strong>opt_one_step</strong> (<em>bool</em><em>, </em><em>optional.</em>) – False (default) to optimise each trajectory separately.</p></li>
+<li><p><strong>output_path</strong> (<em>Path</em><em> | </em><em>str</em><em> | </em><em>None</em>) – Path for individual output files at each timestep. Default=None means no output.</p></li>
+<li><p><strong>aux_coords</strong> (<em>list</em><em>(</em><em>str</em><em>) </em><em>| </em><em>None</em><em>, </em><em>optional.</em>) – List of coordinate names in <cite>ds</cite> to interpolatee to output trajectory.</p></li>
+<li><p><strong>point_iter_kwargs</strong> (<em>dict</em><em> | </em><em>None</em><em>, </em><em>optional.</em>) – Dictionary of options for point iteration</p></li>
+<li><p><strong>minim_kwargs</strong> (<em>dict</em><em> | </em><em>None</em><em>, </em><em>optional.</em>) – Dictionary of options for optimisation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ds</strong> – Resulting trajectories</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xarray Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">The integrate sub-package.</a><ul>
+<li><a class="reference internal" href="#detailed-module-contents">Detailed Module Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="intro.html"
+                          title="previous chapter">Introduction</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="family.html"
+                          title="next chapter">The family sub-package.</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/integrate.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="family.html" title="The family sub-package."
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The integrate sub-package.</a></li>
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019-2026 Peter Clark.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

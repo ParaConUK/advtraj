@@ -1,0 +1,13 @@
+==========================
+The forward module.
+==========================
+This module implements calculation of forward trajectories.
+
+Detailed Module Contents
+------------------------
+The entire module is documented below.
+
+.. automodule:: advtraj.integrate.forward
+   :member-order: bysource
+   :members:
+   :undoc-members:

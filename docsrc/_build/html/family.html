@@ -1,0 +1,584 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>The family sub-package. &#8212; advtraj 0.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The family sub-package." href="utils.html" />
+    <link rel="prev" title="The integrate sub-package." href="integrate.html" />
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="utils.html" title="The family sub-package."
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="integrate.html" title="The integrate sub-package."
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The family sub-package.</a></li>
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+
+  <section id="the-family-sub-package">
+<h1>The family sub-package.<a class="headerlink" href="#the-family-sub-package" title="Permalink to this heading">¶</a></h1>
+<p>This package contains the modules to generate and use trajectory <em>families</em>.</p>
+<section id="detailed-module-contents">
+<h2>Detailed Module Contents<a class="headerlink" href="#detailed-module-contents" title="Permalink to this heading">¶</a></h2>
+<p>The entire module is documented below.</p>
+<span class="target" id="module-advtraj.family.traj_family"></span><p>Created on Fri Dec 23 10:29:03 2022</p>
+<p>&#64;author: Peter Clark</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.traj_family">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">traj_family</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path_base</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_ref_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_ref_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_backward</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_forward</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward_solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'fixed_point_iterator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.traj_family" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a family of trajectories.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>xr.Dataset</em>) – Gridded input data.</p></li>
+<li><p><strong>mask</strong> (<em>xr.DataArray</em>) – Mask defining starting points at each time in source.</p></li>
+<li><p><strong>odir</strong> (<em>Path</em>) – Path to output data directory.</p></li>
+<li><p><strong>output_path_base</strong> (<em>str</em>) – Generic path for output family - an index number will be added.</p></li>
+<li><p><strong>get_objects</strong> (<em>bool</em><em>, </em><em>optional</em>) – Find object ids at each reference time. The default is True.</p></li>
+<li><p><strong>start_ref_time</strong> (<em>float</em><em>, </em><em>optional</em>) – First reference time in sourec data to use. The default is None.</p></li>
+<li><p><strong>end_ref_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Last reference time in sourec data to use.. The default is None.</p></li>
+<li><p><strong>steps_backward</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of timesteps back from the reference in each set of
+trajectories. The default is None.</p></li>
+<li><p><strong>steps_forward</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of timesteps back from the reference in each set of
+trajectories.. The default is None.</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Interpolation order to use in trajectory calculations.
+The default is 5.</p></li>
+<li><p><strong>forward_solver</strong> (<em>str</em><em>, </em><em>optional</em>) – Solver to use in forward trajectory calculation. The default is “fixed_point_iterator”.</p></li>
+<li><p><strong>options</strong> (<em>dict</em><em>, </em><em>optional</em>) – Options for trajectory calculation. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>traj_path_list</strong> – List of paths for trajectory family.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.traj_name_to_data_name">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">traj_name_to_data_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Path</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.traj_name_to_data_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert trajectory file name to data file name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj_file</strong> (<em>str</em>) – File path.</p></li>
+<li><p><strong>opdir</strong> (<em>str</em><em>, </em><em>optional</em>) – New directory name. The default is None.</p></li>
+<li><p><strong>append</strong> (<em>bool</em><em>, </em><em>optional</em>) – True: append ‘_data’ to file name. The default is False.
+False: replace ‘trajectories’ with ‘data’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>data_file_name</strong> – Data file name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.summarise_traj_family">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">summarise_traj_family</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">family_times</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.summarise_traj_family" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate string summary from trajectory family Dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>family_times</strong> (<em>xr.Dataset</em>) – Summary information generated by analyse_traj_family.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>summary</strong> – Visual summary of data times.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.analyse_traj_family">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">analyse_traj_family</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.analyse_traj_family" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract summary information from list of trajectory family paths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>traj_files</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Trajectory family paths.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>family_times</strong> – Summary information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xt.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.data_to_traj_family">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">data_to_traj_family</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varlist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">odir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interp_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">append</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.data_to_traj_family" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate gridded data to trajectory family.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj_files</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Input trajectory filenames.</p></li>
+<li><p><strong>source</strong> (<em>xr.DataSet</em>) – Gridded input data.</p></li>
+<li><p><strong>varlist</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – Variable names to interpolate.</p></li>
+<li><p><strong>odir</strong> (<em>Path</em>) – output directory name.</p></li>
+<li><p><strong>interp_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of Lagrange interpolation. The default is 5.</p></li>
+<li><p><strong>append</strong> (<em>bool</em>) – Map trajectory file name to data file name by appending ‘_data’ (True)
+or replacing ‘trajectories’ with ‘data’ (False). The default is False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output filenames corresponding to traj_files.
+traj_name_to_data_name is used to map one to the other.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.family_coords">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">family_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">family</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coord_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.family_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.find_match_obj_at_time">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">find_match_obj_at_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">traj_iobj:</span> <span class="pre">~typing.Union[~xarray.core.dataset.Dataset,</span> <span class="pre">dict],</span> <span class="pre">b_test,</span> <span class="pre">match_traj:</span> <span class="pre">~typing.Union[~xarray.core.dataset.Dataset,</span> <span class="pre">dict],</span> <span class="pre">match_traj_bounds:</span> <span class="pre">~xarray.core.dataset.Dataset,</span> <span class="pre">matching_objects_at_time:</span> <span class="pre">~typing.Optional[dict],</span> <span class="pre">all_matching_objects:</span> <span class="pre">dict,</span> <span class="pre">match_time_back:</span> <span class="pre">float,</span> <span class="pre">fast:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">use_numpy:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False)</span> <span class="pre">-&gt;</span> <span class="pre">(typing.Optional[dict],</span> <span class="pre">&lt;class</span> <span class="pre">'dict'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.find_match_obj_at_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.find_matching_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">find_matching_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iobj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj_iobj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj_iobj_bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_traj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">match_traj_bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_time_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.find_matching_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find objects in one set of trajectories overlapping one object in another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>iobj</strong> (<em>int</em>) – Object number to match.</p></li>
+<li><p><strong>traj_iobj</strong> (<em>xr.Dataset</em>) – trajectory dataset containing iobj.
+Not used if fast=True so can be None.</p></li>
+<li><p><strong>traj_iobj_bounds</strong> (<em>xr.Dataset</em>) – bounds of active part of traj_obj.</p></li>
+<li><p><strong>match_traj</strong> (<em>xr.Dataset</em>) – trajectory dataset containing objects to match iobj.</p></li>
+<li><p><strong>match_traj_bounds</strong> (<em>xr.Dataset</em>) – bounds of active part of match_traj.</p></li>
+<li><p><strong>fast</strong> (<em>bool</em><em>, </em><em>optional</em>) – Only use box overlap if True. Otherwise, find proportion of
+nearest grid point overlap. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>matching_objects_at_time</strong> – Dictionary.
+Keys equal to times in match_traj_bounds with matching objects
+Values equal to list of obj ids (fast=True) or tuples (object id, overlap)
+Special key ‘All times’ contains similar list for objects matched at any time.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.find_matching_objects_ref">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">find_matching_objects_ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_family_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">master_ref_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_time_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjacent_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.find_matching_objects_ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a dict of objects in a trajectory family matching selected objects
+at a given reference time all times they match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj_family_list</strong> (<em>list</em>) – List of tuples containing (trajectories:xr.Dataset, bounds:xr.Dataset)</p></li>
+<li><p><strong>master_ref_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Time to obtain reference objects to match. The default is None,
+which gives the last dataset in traj_family_list.</p></li>
+<li><p><strong>select</strong> (<em>list</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – List of object ids to match. The default is None, which translates to
+all in the trajectory dataset.</p></li>
+<li><p><strong>fast</strong> (<em>bool</em><em>, </em><em>optional</em>) – Only use box overlap if True. Otherwise, find proportion of
+nearest grid point overlap. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul>
+<li><p><em>dict</em> –</p>
+<dl>
+<dt>Keys:</dt><dd><p>”master_ref”           : master_ref actually used.
+“master_ref_time”      : actual time of master_ref,
+“master_ref_time_index”: index in trajectory data of</p>
+<blockquote>
+<div><p>master_ref_time,</p>
+</div></blockquote>
+<dl class="simple">
+<dt>”matching_objects”<span class="classifier">dict.</span></dt><dd><p>Keys: Object ids in reference dataset matched.
+Items: dict with keys the reference times of trajectories
+with matching objects.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><p><strong>&#64;author</strong> (<em>Peter Clark</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.find_family_matching_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">find_family_matching_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj_family_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dataset</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dataset</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_time_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adjacent_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.find_family_matching_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a dictionary of all objects in a family of trajectories
+matching all the objects in all reference times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj_family_list</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>xr.Dataset</em><em>,</em><em>xr.Dataset</em><em>]</em><em>]</em>) – List of tuples containing (trajectories:xr.Dataset, bounds:xr.Dataset)</p></li>
+<li><p><strong>ref_time_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, restrict matching to objects at reference time.
+The default is True.</p></li>
+<li><p><strong>forward</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True choose reference times if increasing order.
+If False choose reference times if decreasing order.
+The default is True.</p></li>
+<li><p><strong>adjacent_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True only consider times adjacent to each other.
+The default is True.</p></li>
+<li><p><strong>fast</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True use estimate of fractional overlap, otherwise
+just use box overlap. The default is True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Keys: reference times in trajectory family.
+Values: dicts of matching objects at different reference times.
+See <cite>find_matching_objects_ref</cite> for structure.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.find_refined_overlap_fast">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">find_refined_overlap_fast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.find_refined_overlap_fast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute fractional overlap between object in traj1 and requested objects
+in traj2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj1</strong> (<em>xr.Dataset</em>) – Trajectories from a single object.</p></li>
+<li><p><strong>traj2</strong> (<em>xr.Dataset</em>) – Trajectories containing objects with ids in obj_labels.</p></li>
+<li><p><strong>obj_labels</strong> (<em>list</em>) – List of object ids required to find overlap with object in traj1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of (obj_labels, overlap).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.find_refined_overlap">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">find_refined_overlap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">traj1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traj2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_labels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.find_refined_overlap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute fractional overlap between object in traj1 and requested objects
+in traj2.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>traj1</strong> (<em>xr.Dataset</em>) – Trajectories from a single object.</p></li>
+<li><p><strong>traj2</strong> (<em>xr.Dataset</em>) – Trajectories containing objects with ids in obj_labels.</p></li>
+<li><p><strong>obj_labels</strong> (<em>list</em>) – List of object ids required to find overlap with object in traj1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of (obj_labels, overlap).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list(tuple)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.print_matching_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">print_matching_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_times_sel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">full</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.print_matching_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print matching object list.</p>
+<p>See find_matching_objects.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.matching_obj_to_nodelist">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">matching_obj_to_nodelist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matching_objects</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iobj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_times_sel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_thresh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.matching_obj_to_nodelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate list of nodes representing all objects in matching_objects
+that overlap iobj.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matching_objects</strong> (<em>dict</em>) – Matching objects. See <cite>find_matching_objects_ref</cite>.</p></li>
+<li><p><strong>iobj</strong> (<em>int</em>) – Target object.</p></li>
+<li><p><strong>ref_times_sel</strong> (<em>Union</em><em>[</em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Only include reference times in this list. The default is None.</p></li>
+<li><p><strong>overlap_thresh</strong> (<em>float</em><em>, </em><em>optional</em>) – Only include objects with overlap &gt;= object_thresh. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of nodes of type (time: float, object_number:int).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.graph_matching_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">graph_matching_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol_family</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DiGraph</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.graph_matching_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate acyclic directed graph of all the objects with ovelap.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mol_family</strong> (<em>dict</em>) – Matching objects in the trajectory family.</p></li>
+<li><p><strong>include_types</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>,</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Overlap types to include.
+type 1: overlap on adjacent timesteps.
+type 2: only overlap on none-adjacent timesteps.
+The default is None which means all.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>G</strong> – acyclic directed graph.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>nx.DiGraph</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.start_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">start_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.start_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate list of all the starting nodes in a directed graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>G</strong> (<em>nx.DiGraph</em>) – acyclic directed graph.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of nodes with no nodes connecting to.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.end_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">end_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.end_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate list of all the ending nodes in a directed graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>G</strong> (<em>nx.DiGraph</em>) – acyclic directed graph.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of nodes with no nodes connecting from.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.subgraph_ntype">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">subgraph_ntype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.subgraph_ntype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.subgraph_overlap_thresh">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">subgraph_overlap_thresh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.subgraph_overlap_thresh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.pred">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.pred" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate predecessors to node in DiGraph.
+I have found that nx.dfs_predecessors does not work properly on
+directed graphs (I think it generates the predecessors of all successors).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<em>nx.DiGraph</em>) – Acyclic directed graph.</p></li>
+<li><p><strong>o</strong> (<em>Node key in G.</em>) – Required end node.</p></li>
+<li><p><strong>d</strong> (<em>Union</em><em>[</em><em>dict</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Used recursively. Do not supply on call.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Key: Node in G.
+Values: list of nodes connecting to Key.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.related_objects">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">related_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_times_sel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_thresh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.related_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate list of all objects with a path to or from obj.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<em>nx.DiGraph</em>) – acyclic directed graph.</p></li>
+<li><p><strong>obj</strong> (<em>node of the form</em><em> (</em><em>time:float</em><em>, </em><em>object_number:int</em><em>)</em>) – target node in G.</p></li>
+<li><p><strong>ref_times_sel</strong> (<em>Union</em><em>[</em><em>list</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Only include objects these reference times. The default is None.</p></li>
+<li><p><strong>overlap_thresh</strong> (<em>Union</em><em>[</em><em>float</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Only include objects with overlap &gt;= object_thresh. The default is None.</p></li>
+<li><p><strong>ntypes</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>,</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – tuple of overlap types. The default is None which is interpreted as all.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.print_matching_objects_graph">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">print_matching_objects_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.family.traj_family.print_matching_objects_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print all the starting nodes followed by nodes accessible from them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>G</strong> (<em>nx.DiGraph</em>) – acyclic directed graph.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.family.traj_family.draw_object_graph">
+<span class="sig-prename descclassname"><span class="pre">advtraj.family.traj_family.</span></span><span class="sig-name descname"><span class="pre">draw_object_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">G</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DiGraph</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodelist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlap_thresh</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ntypes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">figure</span></span></span><a class="headerlink" href="#advtraj.family.traj_family.draw_object_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw connections between all or selected nodes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>G</strong> (<em>nx.DiGraph</em>) – Acyclic directed graph.</p></li>
+<li><p><strong>nodelist</strong> (<em>list</em><em>, </em><em>optional</em>) – list of nodes in G. The default is None.</p></li>
+<li><p><strong>highlight_nodes</strong> (<em>list</em><em>, </em><em>optional</em>) – list of nodes in nodelist to plot a different colour.
+The default is None.</p></li>
+<li><p><strong>overlap_thresh</strong> (<em>float</em><em>, </em><em>optional</em>) – Only include objects with overlap &gt;= object_thresh.
+The default is None.</p></li>
+<li><p><strong>ntypes</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>,</em><em>]</em><em>,</em><em>None</em><em>]</em><em>, </em><em>optional</em>) – tuple of overlap types. The default is None which is interpreted as all.</p></li>
+<li><p><strong>figsize</strong> (<em>Union</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Figure size (inches) as per matplotlib. The default is None.</p></li>
+<li><p><strong>save_file</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>None</em><em>]</em><em>, </em><em>optional</em>) – Name of file to save plot. The default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">The family sub-package.</a><ul>
+<li><a class="reference internal" href="#detailed-module-contents">Detailed Module Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="integrate.html"
+                          title="previous chapter">The integrate sub-package.</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="utils.html"
+                          title="next chapter">The family sub-package.</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/family.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="utils.html" title="The family sub-package."
+             >next</a> |</li>
+        <li class="right" >
+          <a href="integrate.html" title="The integrate sub-package."
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The family sub-package.</a></li>
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019-2026 Peter Clark.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>

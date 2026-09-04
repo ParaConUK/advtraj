@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>The grid module &#8212; advtraj 0.6.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="The data_to_traj module" href="data_to_traj.html" />
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data_to_traj.html" title="The data_to_traj module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="utils.html" accesskey="U">The utils sub-package.</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The grid module</a></li>
+      </ul>
+    </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+
+  <section id="the-grid-module">
+<h1>The grid module<a class="headerlink" href="#the-grid-module" title="Permalink to this heading">¶</a></h1>
+<p>This module contains tools used to manipulate model grids.</p>
+<section id="detailed-module-contents">
+<h2>Detailed Module Contents<a class="headerlink" href="#detailed-module-contents" title="Permalink to this heading">¶</a></h2>
+<p>The entire module is documented below.</p>
+<span class="target" id="module-advtraj.utils.grid"></span><p>grid.py</p>
+<p>Utilities to deal with grid wrapping etc.</p>
+<p>Currently, caters for the following grid styles:</p>
+<p>“cell_centred”
+- p-point (cell centre) p[0, 0, 0]] at x = dx/2, y = dy/2, z = dz/2.
+- u-point (cell face) u[0, 0, 0] at p[0, 0, 0] - dx/2, i.e. x = 0.
+- v-point (cell face) v[0, 0, 0] at p[0, 0, 0] - dy/2, i.e. y = 0.
+- w-point (cell face) w[0, 0, 0] at p[0, 0, 0] - dz/2, i.e. z = 0.
+- Virtual p point at z = -dz/2.</p>
+<p>“monc”
+- Virtual p points at z = -dz/2 so:
+- p-point (cell centre) p[0, 0, 0]] at x = dx/2, y = dy/2, z = -dz/2.
+- u-point (cell face) u[0, 0, 0] at p[0, 0, 0] + dx/2, i.e. x = dx.
+- v-point (cell face) v[0, 0, 0] at p[0, 0, 0] + dy/2, i.e. y = dy.
+- w-point (cell face) w[0, 0, 0] at p[0, 0, 0] + dz/2, i.e. z = 0.</p>
+<p>“”
+- All points [0, 0, 0] at x = 0, y = 0, z = 0.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.wrap_posn">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">wrap_posn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c_max</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.wrap_posn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap coordinate positions <cite>c</cite> so that they lie inside the range [c_min, c_max[</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.wrap_periodic_grid_coords">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">wrap_periodic_grid_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cyclic_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('x',</span> <span class="pre">'y')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('x',</span> <span class="pre">'y')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.wrap_periodic_grid_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>ensure that positions given by <cite>ds_posn</cite> are inside the coordinates of
+<cite>ds_grid</cite>. Use <cite>cell_centered_coords</cite> to define which coords in <cite>ds_grid</cite>
+are using cell-centered</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.wrap_coords">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">wrap_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.wrap_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for wrap_periodic_grid_coords</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds_posn</strong> (<em>xarray Dataset</em>) – Trajectory positions ‘x’, ‘y’, ‘z’.</p></li>
+<li><p><strong>ds_grid</strong> (<em>xarray Dataset</em>) – grid information.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wrapped version of ds_posn.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xarray Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.wrap_spherical_coords">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">wrap_spherical_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.wrap_spherical_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>ensure that positions given by <cite>ds_posn</cite> are inside the domain of
+<cite>ds_grid</cite> on a spherical polar grid.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.regularize_coords">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">regularize_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.regularize_coords" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.find_coord_grid_spacing">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">find_coord_grid_spacing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da_coord</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_warnings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.find_coord_grid_spacing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.find_grid_spacing">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">find_grid_spacing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('x',</span> <span class="pre">'y',</span> <span class="pre">'z')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.find_grid_spacing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.create_index_dims">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">create_index_dims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offsets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimlist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.create_index_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct x,y,z as ‘grid’ indices
+and make them the primary dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ds</strong> (<em>xarray Dataset</em><em> or </em><em>DataArray</em>) – </p></li>
+<li><p><strong>offsets</strong> (<em>dict</em>) – Index offsets for x,y,z ( so first point of x is offsets[‘x’])</p></li>
+<li><p><strong>dimlist</strong> (<em>dict</em><em>, </em><em>optional</em>) – <p>Identifiers for dimensions corresponding to x,y,z. The default is None.
+If None,
+dimlist = {‘x’:’longitude’,</p>
+<blockquote>
+<div><p>’y’:’latitude’,
+‘z’:’level_number’}</p>
+</div></blockquote>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ds</strong> – Copy of input with new primary dimensions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xarray Dataset or DataArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.great_circle_distance">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">great_circle_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.great_circle_distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.confine_traj_bounds">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">confine_traj_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_posn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vertical_boundary_option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.confine_traj_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Confine trajectory position to domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pos</strong> (<em>numpy array</em>) – trajectory positions (n, 3).</p></li>
+<li><p><strong>nx</strong> (<em>int</em><em> or </em><em>float</em>) – max value of x.</p></li>
+<li><p><strong>ny</strong> (<em>int</em><em> or </em><em>float</em>) – max value of y.</p></li>
+<li><p><strong>nz</strong> (<em>int</em><em> or </em><em>float</em>) – max value of z.</p></li>
+<li><p><strong>vertical_boundary_option</strong> (<em>int</em><em>, </em><em>optional</em>) – DESCRIPTION. The default is 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>pos</strong> – DESCRIPTION.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TYPE</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="advtraj.utils.grid.pt_distance">
+<span class="sig-prename descclassname"><span class="pre">advtraj.utils.grid.</span></span><span class="sig-name descname"><span class="pre">pt_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds_p1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_p2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds_grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#advtraj.utils.grid.pt_distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">The grid module</a><ul>
+<li><a class="reference internal" href="#detailed-module-contents">Detailed Module Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="data_to_traj.html"
+                          title="previous chapter">The data_to_traj module</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/grid.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data_to_traj.html" title="The data_to_traj module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">advtraj 0.6.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="utils.html" >The utils sub-package.</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">The grid module</a></li>
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019-2026 Peter Clark.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.0.2.
+    </div>
+  </body>
+</html>
