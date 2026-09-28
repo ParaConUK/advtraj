@@ -1,0 +1,14 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+type: software
+abstract: "Offline trajectories with advected position scalars in fluid simulations" 
+authors:
+- family-names: Clark
+  given-names: Peter Andrew
+  orcid: https://orcid.org/0000-0003-1001-9226
+- family-names: Denby
+  given-names: Leif
+title: advtraj
+version: v0.6.0_Zenodo
+license: "MIT"
+date-released: 2026-09-28
